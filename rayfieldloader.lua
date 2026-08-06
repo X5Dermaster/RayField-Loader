@@ -2314,7 +2314,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 		
 		    local ImageBar = Instance.new("Frame")
 		    ImageBar.Name = ImageSettings.Name or "ImageBar"
-		    ImageBar.Size = UDim2.new(1, 0, 0, (ImageSettings.YSize or 50) + 16)
+		    ImageBar.Size = UDim2.new(1, -10, 0, (ImageSettings.YSize or 50) + 16)
 		    ImageBar.BackgroundColor3 = SelectedTheme.ElementBackground
 		    ImageBar.BackgroundTransparency = 1
 		    ImageBar.BorderSizePixel = 0
@@ -2356,53 +2356,72 @@ function RayfieldLibrary:CreateWindow(Settings)
 		
 		    TweenService:Create(ImageBar, TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {BackgroundTransparency = 0}):Play()
 		    TweenService:Create(UIStroke, TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {Transparency = 0}):Play()
+
+			function ImageBarValue:Set(NewUrl, NewX, NewY)
+			    if NewUrl then
+			        task.spawn(function()
+			            ensureFolder(RayfieldFolder .. "/Assets")
+			            local fileName = RayfieldFolder .. "/Assets/imgbar_" .. (ImageSettings.Name or "img") .. ".png"
+			            local body = nil
+			            local httpOk, httpRes = pcall(function() return game:HttpGet(NewUrl) end)
+			            if httpOk and type(httpRes) == "string" and #httpRes > 0 then
+			                body = httpRes
+			            elseif requestFunc then
+			                local reqOk, reqRes = pcall(requestFunc, { Url = NewUrl, Method = "GET" })
+			                if reqOk and type(reqRes) == "table" and type(reqRes.Body) == "string" and #reqRes.Body > 0 then
+			                    body = reqRes.Body
+			                end
+			            end
+			            if body then
+			                pcall(writefile, fileName, body)
+			                if getcustomasset then
+			                    local assetOk, asset = pcall(getcustomasset, fileName)
+			                    if assetOk and asset then ImageLabel.Image = asset end
+			                end
+			            end
+			        end)
+			    end
+			    if NewX and NewY then
+			        ImageLabel.Size = UDim2.new(0, NewX, 0, NewY)
+			        ImageLabel.Position = UDim2.new(0.5, -NewX / 2, 0.5, -NewY / 2)
+			        ImageBar.Size = UDim2.new(1, -10, 0, NewY + 16)  -- fix offset disini juga
+			    end
+			end
 		
-		    -- download -> writefile -> getcustomasset, same flow as Rayfield's own asset loader
 		    task.spawn(function()
-		        local ok, res = pcall(requestFunc, {
-		            Url = ImageSettings.ImageUrl,
-		            Method = "GET"
-		        })
-		
-		        if ok and type(res) == "table" and type(res.Body) == "string" and #res.Body > 0 then
-		            local fileName = RayfieldFolder .. "/Assets/imgbar_" .. (ImageSettings.Name or "img") .. ".png"
-		            local writeOk = pcall(writefile, fileName, res.Body)
-		
-		            if writeOk and getcustomasset then
-		                local assetOk, asset = pcall(getcustomasset, fileName)
-		                if assetOk and asset then
-		                    ImageLabel.Image = asset
-		                    TweenService:Create(ImageLabel, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {ImageTransparency = 0}):Play()
-		                end
-		            end
-		        end
-		    end)
-		
-		    function ImageBarValue:Set(NewUrl, NewX, NewY)
-		        if NewUrl then
-		            task.spawn(function()
-		                local ok, res = pcall(requestFunc, {
-		                    Url = NewUrl,
-		                    Method = "GET"
-		                })
-		                if ok and type(res) == "table" and type(res.Body) == "string" and #res.Body > 0 then
-		                    local fileName = RayfieldFolder .. "/Assets/imgbar_" .. (ImageSettings.Name or "img") .. ".png"
-		                    pcall(writefile, fileName, res.Body)
-		                    if getcustomasset then
-		                        local assetOk, asset = pcall(getcustomasset, fileName)
-		                        if assetOk and asset then
-		                            ImageLabel.Image = asset
-		                        end
-		                    end
-		                end
-		            end)
-		        end
-		        if NewX and NewY then
-		            ImageLabel.Size = UDim2.new(0, NewX, 0, NewY)
-		            ImageLabel.Position = UDim2.new(0.5, -NewX / 2, 0.5, -NewY / 2)
-		            ImageBar.Size = UDim2.new(1, 0, 0, NewY + 16)
-		        end
-		    end
+			    ensureFolder(RayfieldFolder .. "/Assets")
+			
+			    local fileName = RayfieldFolder .. "/Assets/imgbar_" .. (ImageSettings.Name or "img") .. ".png"
+			
+			    -- coba HttpGet dulu, fallback ke requestFunc
+			    local body = nil
+			    local httpOk, httpRes = pcall(function()
+			        return game:HttpGet(ImageSettings.ImageUrl)
+			    end)
+			
+			    if httpOk and type(httpRes) == "string" and #httpRes > 0 then
+			        body = httpRes
+			    elseif requestFunc then
+			        local reqOk, reqRes = pcall(requestFunc, {
+			            Url = ImageSettings.ImageUrl,
+			            Method = "GET"
+			        })
+			        if reqOk and type(reqRes) == "table" and type(reqRes.Body) == "string" and #reqRes.Body > 0 then
+			            body = reqRes.Body
+			        end
+			    end
+			
+			    if body then
+			        pcall(writefile, fileName, body)
+			        if getcustomasset then
+			            local assetOk, asset = pcall(getcustomasset, fileName)
+			            if assetOk and asset then
+			                ImageLabel.Image = asset
+			                TweenService:Create(ImageLabel, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {ImageTransparency = 0}):Play()
+			            end
+			        end
+			    end
+			end)
 		
 		    return ImageBarValue
 		end
