@@ -2312,9 +2312,14 @@ function RayfieldLibrary:CreateWindow(Settings)
 		function Tab:CreateImageBar(ImageSettings)
 		    local ImageBarValue = {}
 		
+		    local xSize = ImageSettings.XSize or 100
+		    local ySize = ImageSettings.YSize or 50
+		    local align = ImageSettings.Align or "Center"
+		    local hasText = ImageSettings.Title or ImageSettings.Content
+		
 		    local ImageBar = Instance.new("Frame")
 		    ImageBar.Name = ImageSettings.Name or "ImageBar"
-		    ImageBar.Size = UDim2.new(1, -10, 0, (ImageSettings.YSize or 50) + 16)
+		    ImageBar.Size = UDim2.new(1, -10, 0, math.max(ySize + 16, hasText and 50 or 0))
 		    ImageBar.BackgroundColor3 = SelectedTheme.ElementBackground
 		    ImageBar.BackgroundTransparency = 1
 		    ImageBar.BorderSizePixel = 0
@@ -2330,19 +2335,62 @@ function RayfieldLibrary:CreateWindow(Settings)
 		    UIStroke.Transparency = 1
 		    UIStroke.Parent = ImageBar
 		
-		    local Title = Instance.new("TextLabel")
-		    Title.Name = "Title"
-		    Title.Text = ""
-		    Title.Size = UDim2.new(0, 0, 0, 0)
-		    Title.BackgroundTransparency = 1
-		    Title.TextTransparency = 1
-		    Title.Visible = false
-		    Title.Parent = ImageBar
+		    -- dummy Title (dipake setElementsVisible, diganti kalau hasText)
+		    local TitleLabel = Instance.new("TextLabel")
+		    TitleLabel.Name = "Title"
+		    TitleLabel.BackgroundTransparency = 1
+		    TitleLabel.TextTransparency = 1
+		
+		    if hasText then
+		        -- Title di kanan gambar
+		        TitleLabel.Size = UDim2.new(1, -(xSize + 24), 0, 16)
+		        TitleLabel.Position = UDim2.new(0, xSize + 16, 0.5, ImageSettings.Content and -12 or -8)
+		        TitleLabel.Text = ImageSettings.Title or ""
+		        TitleLabel.Font = Enum.Font.GothamBold
+		        TitleLabel.TextSize = 13
+		        TitleLabel.TextColor3 = SelectedTheme.TextColor
+		        TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+		        TitleLabel.TextTruncate = Enum.TextTruncate.AtEnd
+		    else
+		        TitleLabel.Size = UDim2.new(0, 0, 0, 0)
+		        TitleLabel.Text = ""
+		    end
+		    TitleLabel.Parent = ImageBar
+		
+		    if ImageSettings.Content then
+		        local ContentLabel = Instance.new("TextLabel")
+		        ContentLabel.Name = "Content"
+		        ContentLabel.Size = UDim2.new(1, -(xSize + 24), 0, 14)
+		        ContentLabel.Position = UDim2.new(0, xSize + 16, 0.5, 4)
+		        ContentLabel.BackgroundTransparency = 1
+		        ContentLabel.Text = ImageSettings.Content
+		        ContentLabel.Font = Enum.Font.Gotham
+		        ContentLabel.TextSize = 12
+		        ContentLabel.TextColor3 = SelectedTheme.TextColor
+		        ContentLabel.TextTransparency = 1
+		        ContentLabel.TextXAlignment = Enum.TextXAlignment.Left
+		        ContentLabel.TextTruncate = Enum.TextTruncate.AtEnd
+		        ContentLabel.Parent = ImageBar
+		
+		        TweenService:Create(ContentLabel, TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {TextTransparency = 0.35}):Play()
+		    end
+		
+		    -- posisi image
+		    local xPos
+		    if hasText then
+		        xPos = UDim2.new(0, 8, 0.5, -ySize / 2)
+		    elseif align == "Left" then
+		        xPos = UDim2.new(0, 8, 0.5, -ySize / 2)
+		    elseif align == "Right" then
+		        xPos = UDim2.new(1, -(xSize + 8), 0.5, -ySize / 2)
+		    else
+		        xPos = UDim2.new(0.5, -xSize / 2, 0.5, -ySize / 2)
+		    end
 		
 		    local ImageLabel = Instance.new("ImageLabel")
 		    ImageLabel.Name = "ImageContent"
-		    ImageLabel.Size = UDim2.new(0, ImageSettings.XSize or 100, 0, ImageSettings.YSize or 50)
-		    ImageLabel.Position = UDim2.new(0.5, -(ImageSettings.XSize or 100) / 2, 0.5, -(ImageSettings.YSize or 50) / 2)
+		    ImageLabel.Size = UDim2.new(0, xSize, 0, ySize)
+		    ImageLabel.Position = xPos
 		    ImageLabel.BackgroundTransparency = 1
 		    ImageLabel.ScaleType = Enum.ScaleType.Fit
 		    ImageLabel.ImageTransparency = 1
@@ -2356,72 +2404,62 @@ function RayfieldLibrary:CreateWindow(Settings)
 		
 		    TweenService:Create(ImageBar, TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {BackgroundTransparency = 0}):Play()
 		    TweenService:Create(UIStroke, TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {Transparency = 0}):Play()
-
-			function ImageBarValue:Set(NewUrl, NewX, NewY)
-			    if NewUrl then
-			        task.spawn(function()
-			            ensureFolder(RayfieldFolder .. "/Assets")
-			            local fileName = RayfieldFolder .. "/Assets/imgbar_" .. (ImageSettings.Name or "img") .. ".png"
-			            local body = nil
-			            local httpOk, httpRes = pcall(function() return game:HttpGet(NewUrl) end)
-			            if httpOk and type(httpRes) == "string" and #httpRes > 0 then
-			                body = httpRes
-			            elseif requestFunc then
-			                local reqOk, reqRes = pcall(requestFunc, { Url = NewUrl, Method = "GET" })
-			                if reqOk and type(reqRes) == "table" and type(reqRes.Body) == "string" and #reqRes.Body > 0 then
-			                    body = reqRes.Body
-			                end
-			            end
-			            if body then
-			                pcall(writefile, fileName, body)
-			                if getcustomasset then
-			                    local assetOk, asset = pcall(getcustomasset, fileName)
-			                    if assetOk and asset then ImageLabel.Image = asset end
-			                end
-			            end
-			        end)
-			    end
-			    if NewX and NewY then
-			        ImageLabel.Size = UDim2.new(0, NewX, 0, NewY)
-			        ImageLabel.Position = UDim2.new(0.5, -NewX / 2, 0.5, -NewY / 2)
-			        ImageBar.Size = UDim2.new(1, -10, 0, NewY + 16)  -- fix offset disini juga
-			    end
-			end
+		    TweenService:Create(TitleLabel, TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {TextTransparency = hasText and 0 or 1}):Play()
 		
 		    task.spawn(function()
-			    ensureFolder(RayfieldFolder .. "/Assets")
-			
-			    local fileName = RayfieldFolder .. "/Assets/imgbar_" .. (ImageSettings.Name or "img") .. ".png"
-			
-			    -- coba HttpGet dulu, fallback ke requestFunc
-			    local body = nil
-			    local httpOk, httpRes = pcall(function()
-			        return game:HttpGet(ImageSettings.ImageUrl)
-			    end)
-			
-			    if httpOk and type(httpRes) == "string" and #httpRes > 0 then
-			        body = httpRes
-			    elseif requestFunc then
-			        local reqOk, reqRes = pcall(requestFunc, {
-			            Url = ImageSettings.ImageUrl,
-			            Method = "GET"
-			        })
-			        if reqOk and type(reqRes) == "table" and type(reqRes.Body) == "string" and #reqRes.Body > 0 then
-			            body = reqRes.Body
-			        end
-			    end
-			
-			    if body then
-			        pcall(writefile, fileName, body)
-			        if getcustomasset then
-			            local assetOk, asset = pcall(getcustomasset, fileName)
-			            if assetOk and asset then
-			                ImageLabel.Image = asset
-			                TweenService:Create(ImageLabel, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {ImageTransparency = 0}):Play()
-			            end
-			        end
-			    end
-			end)
+		        ensureFolder(RayfieldFolder .. "/Assets")
+		        local fileName = RayfieldFolder .. "/Assets/imgbar_" .. (ImageSettings.Name or "img") .. ".png"
+		
+		        local body = nil
+		        local httpOk, httpRes = pcall(function() return game:HttpGet(ImageSettings.ImageUrl) end)
+		        if httpOk and type(httpRes) == "string" and #httpRes > 0 then
+		            body = httpRes
+		        elseif requestFunc then
+		            local reqOk, reqRes = pcall(requestFunc, { Url = ImageSettings.ImageUrl, Method = "GET" })
+		            if reqOk and type(reqRes) == "table" and type(reqRes.Body) == "string" and #reqRes.Body > 0 then
+		                body = reqRes.Body
+		            end
+		        end
+		
+		        if body then
+		            pcall(writefile, fileName, body)
+		            if getcustomasset then
+		                local assetOk, asset = pcall(getcustomasset, fileName)
+		                if assetOk and asset then
+		                    ImageLabel.Image = asset
+		                    TweenService:Create(ImageLabel, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {ImageTransparency = 0}):Play()
+		                end
+		            end
+		        end
+		    end)
+		
+		    function ImageBarValue:Set(NewUrl, NewTitle, NewContent)
+		        if NewTitle and TitleLabel then TitleLabel.Text = NewTitle end
+		        if NewContent then
+		            local c = ImageBar:FindFirstChild("Content")
+		            if c then c.Text = NewContent end
+		        end
+		        if NewUrl then
+		            task.spawn(function()
+		                ensureFolder(RayfieldFolder .. "/Assets")
+		                local fileName = RayfieldFolder .. "/Assets/imgbar_" .. (ImageSettings.Name or "img") .. ".png"
+		                local body = nil
+		                local httpOk, httpRes = pcall(function() return game:HttpGet(NewUrl) end)
+		                if httpOk and type(httpRes) == "string" and #httpRes > 0 then body = httpRes
+		                elseif requestFunc then
+		                    local reqOk, reqRes = pcall(requestFunc, { Url = NewUrl, Method = "GET" })
+		                    if reqOk and type(reqRes) == "table" and type(reqRes.Body) == "string" and #reqRes.Body > 0 then body = reqRes.Body end
+		                end
+		                if body then
+		                    pcall(writefile, fileName, body)
+		                    if getcustomasset then
+		                        local assetOk, asset = pcall(getcustomasset, fileName)
+		                        if assetOk and asset then ImageLabel.Image = asset end
+		                    end
+		                end
+		            end)
+		        end
+		    end
 		
 		    return ImageBarValue
 		end
