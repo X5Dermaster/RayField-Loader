@@ -2246,6 +2246,66 @@ function RayfieldLibrary:CreateWindow(Settings)
 			return ButtonValue
 		end
 
+		function Tab:CreateImageBar(ImageSettings)
+		    -- ImageSettings: { Name, ImageUrl, XSize, YSize, CornerRadius (optional) }
+		    local ImageBarValue = {}
+		
+		    -- Outer container frame
+		    local ImageBar = Instance.new("Frame")
+		    ImageBar.Name = ImageSettings.Name or "ImageBar"
+		    ImageBar.Size = UDim2.new(1, 0, 0, (ImageSettings.YSize or 50) + 16)
+		    ImageBar.BackgroundColor3 = SelectedTheme.ElementBackground
+		    ImageBar.BackgroundTransparency = 1
+		    ImageBar.BorderSizePixel = 0
+		    ImageBar.ClipsDescendants = true
+		    ImageBar.Parent = TabPage
+		
+		    local UICorner = Instance.new("UICorner")
+		    UICorner.CornerRadius = UDim.new(0, 5)
+		    UICorner.Parent = ImageBar
+		
+		    local UIStroke = Instance.new("UIStroke")
+		    UIStroke.Color = SelectedTheme.ElementBorder
+		    UIStroke.Transparency = 1
+		    UIStroke.Parent = ImageBar
+		
+		    -- Center the image inside the bar
+		    local ImageLabel = Instance.new("ImageLabel")
+		    ImageLabel.Name = "ImageContent"
+		    ImageLabel.Size = UDim2.new(0, ImageSettings.XSize or 100, 0, ImageSettings.YSize or 50)
+		    ImageLabel.Position = UDim2.new(0.5, -(ImageSettings.XSize or 100) / 2, 0.5, -(ImageSettings.YSize or 50) / 2)
+		    ImageLabel.BackgroundTransparency = 1
+		    ImageLabel.Image = ImageSettings.ImageUrl or ""
+		    ImageLabel.ScaleType = Enum.ScaleType.Fit
+		    ImageLabel.ImageTransparency = 1
+		    ImageLabel.Parent = ImageBar
+		
+		    if ImageSettings.CornerRadius then
+		        local ImgCorner = Instance.new("UICorner")
+		        ImgCorner.CornerRadius = UDim.new(0, ImageSettings.CornerRadius)
+		        ImgCorner.Parent = ImageLabel
+		    end
+		
+		    -- Fade in animations, matches Rayfield's standard 0.7s expo
+		    TweenService:Create(ImageBar, TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {BackgroundTransparency = 0}):Play()
+		    TweenService:Create(UIStroke, TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {Transparency = 0}):Play()
+		    TweenService:Create(ImageLabel, TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {ImageTransparency = 0}):Play()
+		
+		    -- Update image URL + size at runtime
+		    function ImageBarValue:Set(NewUrl, NewX, NewY)
+		        if NewUrl then
+		            ImageLabel.Image = NewUrl
+		        end
+		        if NewX and NewY then
+		            ImageLabel.Size = UDim2.new(0, NewX, 0, NewY)
+		            ImageLabel.Position = UDim2.new(0.5, -NewX / 2, 0.5, -NewY / 2)
+		            ImageBar.Size = UDim2.new(1, 0, 0, NewY + 16)
+		        end
+		    end
+		
+		    return ImageBarValue
+		end
+				
 		-- ColorPicker
 		function Tab:CreateColorPicker(ColorPickerSettings) -- by Throit
 			ColorPickerSettings.Type = "ColorPicker"
