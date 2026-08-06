@@ -2246,7 +2246,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 			return ButtonValue
 		end
 
-		function Tab:CreateImageBar(ImageSettings)
+		--[[function Tab:CreateImageBar(ImageSettings)
 		    local ImageBarValue = {}
 		
 		    local ImageBar = Instance.new("Frame")
@@ -2299,6 +2299,104 @@ function RayfieldLibrary:CreateWindow(Settings)
 		
 		    function ImageBarValue:Set(NewUrl, NewX, NewY)
 		        if NewUrl then ImageLabel.Image = NewUrl end
+		        if NewX and NewY then
+		            ImageLabel.Size = UDim2.new(0, NewX, 0, NewY)
+		            ImageLabel.Position = UDim2.new(0.5, -NewX / 2, 0.5, -NewY / 2)
+		            ImageBar.Size = UDim2.new(1, 0, 0, NewY + 16)
+		        end
+		    end
+		
+		    return ImageBarValue
+		end]]
+
+		function Tab:CreateImageBar(ImageSettings)
+		    local ImageBarValue = {}
+		
+		    local ImageBar = Instance.new("Frame")
+		    ImageBar.Name = ImageSettings.Name or "ImageBar"
+		    ImageBar.Size = UDim2.new(1, 0, 0, (ImageSettings.YSize or 50) + 16)
+		    ImageBar.BackgroundColor3 = SelectedTheme.ElementBackground
+		    ImageBar.BackgroundTransparency = 1
+		    ImageBar.BorderSizePixel = 0
+		    ImageBar.ClipsDescendants = true
+		    ImageBar.Parent = TabPage
+		
+		    local UICorner = Instance.new("UICorner")
+		    UICorner.CornerRadius = UDim.new(0, 5)
+		    UICorner.Parent = ImageBar
+		
+		    local UIStroke = Instance.new("UIStroke")
+		    UIStroke.Color = SelectedTheme.ElementStroke
+		    UIStroke.Transparency = 1
+		    UIStroke.Parent = ImageBar
+		
+		    local Title = Instance.new("TextLabel")
+		    Title.Name = "Title"
+		    Title.Text = ""
+		    Title.Size = UDim2.new(0, 0, 0, 0)
+		    Title.BackgroundTransparency = 1
+		    Title.TextTransparency = 1
+		    Title.Visible = false
+		    Title.Parent = ImageBar
+		
+		    local ImageLabel = Instance.new("ImageLabel")
+		    ImageLabel.Name = "ImageContent"
+		    ImageLabel.Size = UDim2.new(0, ImageSettings.XSize or 100, 0, ImageSettings.YSize or 50)
+		    ImageLabel.Position = UDim2.new(0.5, -(ImageSettings.XSize or 100) / 2, 0.5, -(ImageSettings.YSize or 50) / 2)
+		    ImageLabel.BackgroundTransparency = 1
+		    ImageLabel.ScaleType = Enum.ScaleType.Fit
+		    ImageLabel.ImageTransparency = 1
+		    ImageLabel.Parent = ImageBar
+		
+		    if ImageSettings.CornerRadius then
+		        local ImgCorner = Instance.new("UICorner")
+		        ImgCorner.CornerRadius = UDim.new(0, ImageSettings.CornerRadius)
+		        ImgCorner.Parent = ImageLabel
+		    end
+		
+		    TweenService:Create(ImageBar, TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {BackgroundTransparency = 0}):Play()
+		    TweenService:Create(UIStroke, TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {Transparency = 0}):Play()
+		
+		    -- download -> writefile -> getcustomasset, same flow as Rayfield's own asset loader
+		    task.spawn(function()
+		        local ok, res = pcall(requestFunc, {
+		            Url = ImageSettings.ImageUrl,
+		            Method = "GET"
+		        })
+		
+		        if ok and type(res) == "table" and type(res.Body) == "string" and #res.Body > 0 then
+		            local fileName = RayfieldFolder .. "/Assets/imgbar_" .. (ImageSettings.Name or "img") .. ".png"
+		            local writeOk = pcall(writefile, fileName, res.Body)
+		
+		            if writeOk and getcustomasset then
+		                local assetOk, asset = pcall(getcustomasset, fileName)
+		                if assetOk and asset then
+		                    ImageLabel.Image = asset
+		                    TweenService:Create(ImageLabel, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {ImageTransparency = 0}):Play()
+		                end
+		            end
+		        end
+		    end)
+		
+		    function ImageBarValue:Set(NewUrl, NewX, NewY)
+		        if NewUrl then
+		            task.spawn(function()
+		                local ok, res = pcall(requestFunc, {
+		                    Url = NewUrl,
+		                    Method = "GET"
+		                })
+		                if ok and type(res) == "table" and type(res.Body) == "string" and #res.Body > 0 then
+		                    local fileName = RayfieldFolder .. "/Assets/imgbar_" .. (ImageSettings.Name or "img") .. ".png"
+		                    pcall(writefile, fileName, res.Body)
+		                    if getcustomasset then
+		                        local assetOk, asset = pcall(getcustomasset, fileName)
+		                        if assetOk and asset then
+		                            ImageLabel.Image = asset
+		                        end
+		                    end
+		                end
+		            end)
+		        end
 		        if NewX and NewY then
 		            ImageLabel.Size = UDim2.new(0, NewX, 0, NewY)
 		            ImageLabel.Position = UDim2.new(0.5, -NewX / 2, 0.5, -NewY / 2)
