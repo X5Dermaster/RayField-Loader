@@ -2335,14 +2335,12 @@ function RayfieldLibrary:CreateWindow(Settings)
 		    UIStroke.Transparency = 1
 		    UIStroke.Parent = ImageBar
 		
-		    -- dummy Title (dipake setElementsVisible, diganti kalau hasText)
 		    local TitleLabel = Instance.new("TextLabel")
 		    TitleLabel.Name = "Title"
 		    TitleLabel.BackgroundTransparency = 1
 		    TitleLabel.TextTransparency = 1
 		
 		    if hasText then
-		        -- Title di kanan gambar
 		        TitleLabel.Size = UDim2.new(1, -(xSize + 24), 0, 16)
 		        TitleLabel.Position = UDim2.new(0, xSize + 16, 0.5, ImageSettings.Content and -12 or -8)
 		        TitleLabel.Text = ImageSettings.Title or ""
@@ -2375,7 +2373,6 @@ function RayfieldLibrary:CreateWindow(Settings)
 		        TweenService:Create(ContentLabel, TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {TextTransparency = 0.35}):Play()
 		    end
 		
-		    -- posisi image
 		    local xPos
 		    if hasText then
 		        xPos = UDim2.new(0, 8, 0.5, -ySize / 2)
