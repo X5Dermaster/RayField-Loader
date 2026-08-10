@@ -2246,68 +2246,197 @@ function RayfieldLibrary:CreateWindow(Settings)
 			return ButtonValue
 		end
 
-		--[[function Tab:CreateImageBar(ImageSettings)
-		    local ImageBarValue = {}
+		function Tab:CreateGrid(GridSettings)
+		    -- GridSettings: {
+		    --   Name      : string
+		    --   Columns   : number  (default 2)
+		    --   Items     : { { Name, Callback, CurrentValue } }
+		    --   Type      : "Toggle" | "Button"  (default "Toggle")
+		    -- }
+		    local GridValue = {}
 		
-		    local ImageBar = Instance.new("Frame")
-		    ImageBar.Name = ImageSettings.Name or "ImageBar"
-		    ImageBar.Size = UDim2.new(1, 0, 0, (ImageSettings.YSize or 50) + 16)
-		    ImageBar.BackgroundColor3 = SelectedTheme.ElementBackground
-		    ImageBar.BackgroundTransparency = 1
-		    ImageBar.BorderSizePixel = 0
-		    ImageBar.ClipsDescendants = true
-		    ImageBar.Parent = TabPage
+		    local columns   = GridSettings.Columns or 2
+		    local itemType  = GridSettings.Type or "Toggle"
+		    local items     = GridSettings.Items or {}
+		    local itemValues = {}
 		
-		    local UICorner = Instance.new("UICorner")
-		    UICorner.CornerRadius = UDim.new(0, 5)
-		    UICorner.Parent = ImageBar
+		    -- outer container — lebar full kayak element lain
+		    local Grid = Instance.new("Frame")
+		    Grid.Name               = GridSettings.Name or "Grid"
+		    Grid.Size               = UDim2.new(1, -10, 0, 0)
+		    Grid.AutomaticSize      = Enum.AutomaticSize.Y
+		    Grid.BackgroundTransparency = 1
+		    Grid.BorderSizePixel    = 0
+		    Grid.Parent             = TabPage
 		
-		    local UIStroke = Instance.new("UIStroke")
-		    UIStroke.Color = SelectedTheme.ElementStroke  -- fix: ElementBorder -> ElementStroke
-		    UIStroke.Transparency = 1
-		    UIStroke.Parent = ImageBar
-		
-		    -- dummy Title biar setElementsVisible ga error
+		    -- dummy Title buat setElementsVisible
 		    local Title = Instance.new("TextLabel")
-		    Title.Name = "Title"
-		    Title.Text = ""
-		    Title.Size = UDim2.new(0, 0, 0, 0)
+		    Title.Name               = "Title"
+		    Title.Text               = ""
+		    Title.Size               = UDim2.new(0, 0, 0, 0)
 		    Title.BackgroundTransparency = 1
-		    Title.TextTransparency = 1
-		    Title.Visible = false
-		    Title.Parent = ImageBar
+		    Title.TextTransparency   = 1
+		    Title.Visible            = false
+		    Title.Parent             = Grid
 		
-		    local ImageLabel = Instance.new("ImageLabel")
-		    ImageLabel.Name = "ImageContent"
-		    ImageLabel.Size = UDim2.new(0, ImageSettings.XSize or 100, 0, ImageSettings.YSize or 50)
-		    ImageLabel.Position = UDim2.new(0.5, -(ImageSettings.XSize or 100) / 2, 0.5, -(ImageSettings.YSize or 50) / 2)
-		    ImageLabel.BackgroundTransparency = 1
-		    ImageLabel.Image = ImageSettings.ImageUrl or ""
-		    ImageLabel.ScaleType = Enum.ScaleType.Fit
-		    ImageLabel.ImageTransparency = 1
-		    ImageLabel.Parent = ImageBar
+		    local UIGrid = Instance.new("UIGridLayout")
+		    UIGrid.CellSize          = UDim2.new(1 / columns, -6, 0, 42)
+		    UIGrid.CellPadding       = UDim2.new(0, 6, 0, 6)
+		    UIGrid.FillDirection     = Enum.FillDirection.Horizontal
+		    UIGrid.HorizontalAlignment = Enum.HorizontalAlignment.Left
+		    UIGrid.SortOrder         = Enum.SortOrder.LayoutOrder
+		    UIGrid.Parent            = Grid
 		
-		    if ImageSettings.CornerRadius then
-		        local ImgCorner = Instance.new("UICorner")
-		        ImgCorner.CornerRadius = UDim.new(0, ImageSettings.CornerRadius)
-		        ImgCorner.Parent = ImageLabel
-		    end
+		    local UIPad = Instance.new("UIPadding")
+		    UIPad.PaddingBottom = UDim.new(0, 6)
+		    UIPad.Parent        = Grid
 		
-		    TweenService:Create(ImageBar, TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {BackgroundTransparency = 0}):Play()
-		    TweenService:Create(UIStroke, TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {Transparency = 0}):Play()
-		    TweenService:Create(ImageLabel, TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {ImageTransparency = 0}):Play()
+		    -- build tiap item
+		    for idx, item in ipairs(items) do
+		        local Cell = Instance.new("Frame")
+		        Cell.Name                   = item.Name or ("Item" .. idx)
+		        Cell.BackgroundColor3       = SelectedTheme.ElementBackground
+		        Cell.BackgroundTransparency = 1
+		        Cell.BorderSizePixel        = 0
+		        Cell.LayoutOrder            = idx
+		        Cell.Parent                 = Grid
 		
-		    function ImageBarValue:Set(NewUrl, NewX, NewY)
-		        if NewUrl then ImageLabel.Image = NewUrl end
-		        if NewX and NewY then
-		            ImageLabel.Size = UDim2.new(0, NewX, 0, NewY)
-		            ImageLabel.Position = UDim2.new(0.5, -NewX / 2, 0.5, -NewY / 2)
-		            ImageBar.Size = UDim2.new(1, 0, 0, NewY + 16)
+		        local CellCorner = Instance.new("UICorner")
+		        CellCorner.CornerRadius = UDim.new(0, 5)
+		        CellCorner.Parent       = Cell
+		
+		        local CellStroke = Instance.new("UIStroke")
+		        CellStroke.Color        = SelectedTheme.ElementStroke
+		        CellStroke.Transparency = 1
+		        CellStroke.Parent       = Cell
+		
+		        -- label kiri
+		        local Label = Instance.new("TextLabel")
+		        Label.Name               = "Label"
+		        Label.Size               = UDim2.new(1, -54, 1, 0)
+		        Label.Position           = UDim2.new(0, 12, 0, 0)
+		        Label.BackgroundTransparency = 1
+		        Label.Text               = item.Name or ""
+		        Label.Font               = Enum.Font.GothamSemibold
+		        Label.TextSize           = 13
+		        Label.TextColor3         = SelectedTheme.TextColor
+		        Label.TextXAlignment     = Enum.TextXAlignment.Left
+		        Label.TextTransparency   = 1
+		        Label.TextTruncate       = Enum.TextTruncate.AtEnd
+		        Label.Parent             = Cell
+		
+		        -- fade in
+		        TweenService:Create(Cell, TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {BackgroundTransparency = 0}):Play()
+		        TweenService:Create(CellStroke, TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {Transparency = 0}):Play()
+		        TweenService:Create(Label, TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {TextTransparency = 0}):Play()
+		
+		        local itemHandle = {}
+		
+		        if itemType == "Toggle" then
+		            local toggled = item.CurrentValue or false
+		
+		            -- toggle track
+		            local Track = Instance.new("Frame")
+		            Track.Name               = "Track"
+		            Track.Size               = UDim2.new(0, 36, 0, 20)
+		            Track.Position           = UDim2.new(1, -46, 0.5, -10)
+		            Track.BackgroundColor3   = toggled and SelectedTheme.ToggleColor or SelectedTheme.ElementBackground
+		            Track.BorderSizePixel    = 0
+		            Track.ZIndex             = 2
+		            Track.Parent             = Cell
+		            Instance.new("UICorner", Track).CornerRadius = UDim.new(1, 0)
+		
+		            local TrackStroke = Instance.new("UIStroke")
+		            TrackStroke.Color        = SelectedTheme.ElementStroke
+		            TrackStroke.Transparency = 0.5
+		            TrackStroke.Parent       = Track
+		
+		            -- knob
+		            local Knob = Instance.new("Frame")
+		            Knob.Name             = "Knob"
+		            Knob.Size             = UDim2.new(0, 14, 0, 14)
+		            Knob.Position         = toggled
+		                and UDim2.new(1, -17, 0.5, -7)
+		                or  UDim2.new(0, 3, 0.5, -7)
+		            Knob.BackgroundColor3 = Color3.new(1, 1, 1)
+		            Knob.BorderSizePixel  = 0
+		            Knob.ZIndex           = 3
+		            Knob.Parent           = Track
+		            Instance.new("UICorner", Knob).CornerRadius = UDim.new(1, 0)
+		
+		            -- interact
+		            local Interact = Instance.new("TextButton")
+		            Interact.Size               = UDim2.fromScale(1, 1)
+		            Interact.BackgroundTransparency = 1
+		            Interact.Text               = ""
+		            Interact.ZIndex             = 10
+		            Interact.Parent             = Cell
+		
+		            local function setToggle(val, silent)
+		                toggled = val
+		                local knobPos  = val and UDim2.new(1, -17, 0.5, -7) or UDim2.new(0, 3, 0.5, -7)
+		                local trackCol = val and SelectedTheme.ToggleColor or SelectedTheme.ElementBackground
+		                TweenService:Create(Knob,  TweenInfo.new(0.2, Enum.EasingStyle.Quint), {Position         = knobPos}):Play()
+		                TweenService:Create(Track, TweenInfo.new(0.2, Enum.EasingStyle.Quint), {BackgroundColor3  = trackCol}):Play()
+		                if not silent and item.Callback then
+		                    pcall(item.Callback, val)
+		                end
+		            end
+		
+		            Interact.MouseButton1Click:Connect(function()
+		                setToggle(not toggled)
+		            end)
+		
+		            -- hover
+		            Interact.MouseEnter:Connect(function()
+		                TweenService:Create(Cell, TweenInfo.new(0.2, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}):Play()
+		            end)
+		            Interact.MouseLeave:Connect(function()
+		                TweenService:Create(Cell, TweenInfo.new(0.2, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
+		            end)
+		
+		            function itemHandle:Set(val)
+		                setToggle(val, true)
+		            end
+		
+		            function itemHandle:Get()
+		                return toggled
+		            end
+		
+		        elseif itemType == "Button" then
+		            local Interact = Instance.new("TextButton")
+		            Interact.Size               = UDim2.fromScale(1, 1)
+		            Interact.BackgroundTransparency = 1
+		            Interact.Text               = ""
+		            Interact.ZIndex             = 10
+		            Interact.Parent             = Cell
+		
+		            Interact.MouseButton1Click:Connect(function()
+		                -- success flash
+		                TweenService:Create(Cell, TweenInfo.new(0.15, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}):Play()
+		                task.wait(0.15)
+		                TweenService:Create(Cell, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
+		                if item.Callback then pcall(item.Callback) end
+		            end)
+		
+		            Interact.MouseEnter:Connect(function()
+		                TweenService:Create(Cell, TweenInfo.new(0.2, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}):Play()
+		            end)
+		            Interact.MouseLeave:Connect(function()
+		                TweenService:Create(Cell, TweenInfo.new(0.2, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
+		            end)
 		        end
+		
+		        itemValues[item.Name or idx] = itemHandle
 		    end
 		
-		    return ImageBarValue
-		end]]
+		    -- GridValue:Get("ItemName") -> handle { Set(), Get() }
+		    function GridValue:Get(name)
+		        return itemValues[name]
+		    end
+		
+		    return GridValue
+		end
 
 		function Tab:CreateImageBar(ImageSettings)
 		    local ImageBarValue = {}
