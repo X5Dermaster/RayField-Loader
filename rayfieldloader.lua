@@ -2247,20 +2247,13 @@ function RayfieldLibrary:CreateWindow(Settings)
 		end
 
 		function Tab:CreateGrid(GridSettings)
-		    -- GridSettings: {
-		    --   Name      : string
-		    --   Columns   : number  (default 2)
-		    --   Items     : { { Name, Callback, CurrentValue } }
-		    --   Type      : "Toggle" | "Button"  (default "Toggle")
-		    -- }
 		    local GridValue = {}
 		
-		    local columns   = GridSettings.Columns or 2
-		    local itemType  = GridSettings.Type or "Toggle"
-		    local items     = GridSettings.Items or {}
+		    local columns    = GridSettings.Columns or 2
+		    local itemType   = GridSettings.Type or "Toggle"
+		    local items      = GridSettings.Items or {}
 		    local itemValues = {}
 		
-		    -- outer container — lebar full kayak element lain
 		    local Grid = Instance.new("Frame")
 		    Grid.Name               = GridSettings.Name or "Grid"
 		    Grid.Size               = UDim2.new(1, -10, 0, 0)
@@ -2269,48 +2262,76 @@ function RayfieldLibrary:CreateWindow(Settings)
 		    Grid.BorderSizePixel    = 0
 		    Grid.Parent             = TabPage
 		
-		    -- dummy Title buat setElementsVisible
-		    local Title = Instance.new("TextLabel")
-		    Title.Name               = "Title"
-		    Title.Text               = ""
-		    Title.Size               = UDim2.new(0, 0, 0, 0)
-		    Title.BackgroundTransparency = 1
-		    Title.TextTransparency   = 1
-		    Title.Visible            = false
-		    Title.Parent             = Grid
+		    -- REQUIRED by setElementsVisible
+		    local GridUIStroke = Instance.new("UIStroke")
+		    GridUIStroke.Name        = "UIStroke"
+		    GridUIStroke.Transparency = 1
+		    GridUIStroke.Parent      = Grid
+		
+		    local GridTitle = Instance.new("TextLabel")
+		    GridTitle.Name               = "Title"
+		    GridTitle.Text               = ""
+		    GridTitle.Size               = UDim2.new(0, 0, 0, 0)
+		    GridTitle.BackgroundTransparency = 1
+		    GridTitle.TextTransparency   = 1
+		    GridTitle.Visible            = false
+		    GridTitle.Parent             = Grid
+		
+		    Grid:SetAttribute("BackgroundTransparencyTarget", 1)
+		    Grid:SetAttribute("UIStrokeTransparencyTarget",   1)
+		    Grid:SetAttribute("TitleTextTransparencyTarget",  1)
 		
 		    local UIGrid = Instance.new("UIGridLayout")
-		    UIGrid.CellSize          = UDim2.new(1 / columns, -6, 0, 42)
-		    UIGrid.CellPadding       = UDim2.new(0, 6, 0, 6)
-		    UIGrid.FillDirection     = Enum.FillDirection.Horizontal
-		    UIGrid.HorizontalAlignment = Enum.HorizontalAlignment.Left
-		    UIGrid.SortOrder         = Enum.SortOrder.LayoutOrder
-		    UIGrid.Parent            = Grid
+		    UIGrid.CellSize             = UDim2.new(1 / columns, -6, 0, 42)
+		    UIGrid.CellPadding          = UDim2.new(0, 6, 0, 6)
+		    UIGrid.FillDirection        = Enum.FillDirection.Horizontal
+		    UIGrid.HorizontalAlignment  = Enum.HorizontalAlignment.Left
+		    UIGrid.SortOrder            = Enum.SortOrder.LayoutOrder
+		    UIGrid.Parent               = Grid
 		
 		    local UIPad = Instance.new("UIPadding")
 		    UIPad.PaddingBottom = UDim.new(0, 6)
 		    UIPad.Parent        = Grid
 		
-		    -- build tiap item
+		    local accentColor = SelectedTheme.ToggleColor
+		        or SelectedTheme.SystemAccentColorDark3
+		        or Color3.fromRGB(50, 138, 220)
+		
 		    for idx, item in ipairs(items) do
 		        local Cell = Instance.new("Frame")
-		        Cell.Name                   = item.Name or ("Item" .. idx)
-		        Cell.BackgroundColor3       = SelectedTheme.ElementBackground
+		        Cell.Name               = item.Name or ("Item" .. idx)
+		        Cell.BackgroundColor3   = SelectedTheme.ElementBackground
 		        Cell.BackgroundTransparency = 1
-		        Cell.BorderSizePixel        = 0
-		        Cell.LayoutOrder            = idx
-		        Cell.Parent                 = Grid
+		        Cell.BorderSizePixel    = 0
+		        Cell.LayoutOrder        = idx
+		        Cell.Parent             = Grid
 		
-		        local CellCorner = Instance.new("UICorner")
-		        CellCorner.CornerRadius = UDim.new(0, 5)
-		        CellCorner.Parent       = Cell
-		
+		        -- REQUIRED: setElementsVisible akses element.UIStroke langsung
 		        local CellStroke = Instance.new("UIStroke")
+		        CellStroke.Name         = "UIStroke"
 		        CellStroke.Color        = SelectedTheme.ElementStroke
 		        CellStroke.Transparency = 1
 		        CellStroke.Parent       = Cell
 		
-		        -- label kiri
+		        -- REQUIRED: setElementsVisible akses element.Title langsung
+		        local CellTitle = Instance.new("TextLabel")
+		        CellTitle.Name               = "Title"
+		        CellTitle.Text               = ""
+		        CellTitle.Size               = UDim2.new(0, 0, 0, 0)
+		        CellTitle.BackgroundTransparency = 1
+		        CellTitle.TextTransparency   = 1
+		        CellTitle.Visible            = false
+		        CellTitle.Parent             = Cell
+		
+		        -- attributes buat transparency target
+		        Cell:SetAttribute("BackgroundTransparencyTarget", 0)
+		        Cell:SetAttribute("UIStrokeTransparencyTarget",   0)
+		        Cell:SetAttribute("TitleTextTransparencyTarget",  1)
+		
+		        local Corner = Instance.new("UICorner")
+		        Corner.CornerRadius = UDim.new(0, 5)
+		        Corner.Parent       = Cell
+		
 		        local Label = Instance.new("TextLabel")
 		        Label.Name               = "Label"
 		        Label.Size               = UDim2.new(1, -54, 1, 0)
@@ -2325,25 +2346,23 @@ function RayfieldLibrary:CreateWindow(Settings)
 		        Label.TextTruncate       = Enum.TextTruncate.AtEnd
 		        Label.Parent             = Cell
 		
-		        -- fade in
-		        TweenService:Create(Cell, TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {BackgroundTransparency = 0}):Play()
-		        TweenService:Create(CellStroke, TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {Transparency = 0}):Play()
-		        TweenService:Create(Label, TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {TextTransparency = 0}):Play()
+		        TweenService:Create(Cell,        TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {BackgroundTransparency = 0}):Play()
+		        TweenService:Create(CellStroke,  TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {Transparency = 0}):Play()
+		        TweenService:Create(Label,       TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {TextTransparency = 0}):Play()
 		
 		        local itemHandle = {}
 		
 		        if itemType == "Toggle" then
 		            local toggled = item.CurrentValue or false
 		
-		            -- toggle track
 		            local Track = Instance.new("Frame")
-		            Track.Name               = "Track"
-		            Track.Size               = UDim2.new(0, 36, 0, 20)
-		            Track.Position           = UDim2.new(1, -46, 0.5, -10)
-		            Track.BackgroundColor3   = toggled and SelectedTheme.ToggleColor or SelectedTheme.ElementBackground
-		            Track.BorderSizePixel    = 0
-		            Track.ZIndex             = 2
-		            Track.Parent             = Cell
+		            Track.Name             = "Track"
+		            Track.Size             = UDim2.new(0, 36, 0, 20)
+		            Track.Position         = UDim2.new(1, -46, 0.5, -10)
+		            Track.BackgroundColor3 = toggled and accentColor or SelectedTheme.ElementBackground
+		            Track.BorderSizePixel  = 0
+		            Track.ZIndex           = 2
+		            Track.Parent           = Cell
 		            Instance.new("UICorner", Track).CornerRadius = UDim.new(1, 0)
 		
 		            local TrackStroke = Instance.new("UIStroke")
@@ -2351,20 +2370,18 @@ function RayfieldLibrary:CreateWindow(Settings)
 		            TrackStroke.Transparency = 0.5
 		            TrackStroke.Parent       = Track
 		
-		            -- knob
 		            local Knob = Instance.new("Frame")
 		            Knob.Name             = "Knob"
 		            Knob.Size             = UDim2.new(0, 14, 0, 14)
 		            Knob.Position         = toggled
 		                and UDim2.new(1, -17, 0.5, -7)
-		                or  UDim2.new(0, 3, 0.5, -7)
+		                or  UDim2.new(0, 3,   0.5, -7)
 		            Knob.BackgroundColor3 = Color3.new(1, 1, 1)
 		            Knob.BorderSizePixel  = 0
 		            Knob.ZIndex           = 3
 		            Knob.Parent           = Track
 		            Instance.new("UICorner", Knob).CornerRadius = UDim.new(1, 0)
 		
-		            -- interact
 		            local Interact = Instance.new("TextButton")
 		            Interact.Size               = UDim2.fromScale(1, 1)
 		            Interact.BackgroundTransparency = 1
@@ -2375,9 +2392,9 @@ function RayfieldLibrary:CreateWindow(Settings)
 		            local function setToggle(val, silent)
 		                toggled = val
 		                local knobPos  = val and UDim2.new(1, -17, 0.5, -7) or UDim2.new(0, 3, 0.5, -7)
-		                local trackCol = val and SelectedTheme.ToggleColor or SelectedTheme.ElementBackground
-		                TweenService:Create(Knob,  TweenInfo.new(0.2, Enum.EasingStyle.Quint), {Position         = knobPos}):Play()
-		                TweenService:Create(Track, TweenInfo.new(0.2, Enum.EasingStyle.Quint), {BackgroundColor3  = trackCol}):Play()
+		                local trackCol = val and accentColor or SelectedTheme.ElementBackground
+		                TweenService:Create(Knob,  TweenInfo.new(0.2, Enum.EasingStyle.Quint), {Position        = knobPos}):Play()
+		                TweenService:Create(Track, TweenInfo.new(0.2, Enum.EasingStyle.Quint), {BackgroundColor3 = trackCol}):Play()
 		                if not silent and item.Callback then
 		                    pcall(item.Callback, val)
 		                end
@@ -2387,7 +2404,6 @@ function RayfieldLibrary:CreateWindow(Settings)
 		                setToggle(not toggled)
 		            end)
 		
-		            -- hover
 		            Interact.MouseEnter:Connect(function()
 		                TweenService:Create(Cell, TweenInfo.new(0.2, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}):Play()
 		            end)
@@ -2395,13 +2411,8 @@ function RayfieldLibrary:CreateWindow(Settings)
 		                TweenService:Create(Cell, TweenInfo.new(0.2, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
 		            end)
 		
-		            function itemHandle:Set(val)
-		                setToggle(val, true)
-		            end
-		
-		            function itemHandle:Get()
-		                return toggled
-		            end
+		            function itemHandle:Set(val)  setToggle(val, true) end
+		            function itemHandle:Get()     return toggled        end
 		
 		        elseif itemType == "Button" then
 		            local Interact = Instance.new("TextButton")
@@ -2412,10 +2423,9 @@ function RayfieldLibrary:CreateWindow(Settings)
 		            Interact.Parent             = Cell
 		
 		            Interact.MouseButton1Click:Connect(function()
-		                -- success flash
 		                TweenService:Create(Cell, TweenInfo.new(0.15, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}):Play()
 		                task.wait(0.15)
-		                TweenService:Create(Cell, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
+		                TweenService:Create(Cell, TweenInfo.new(0.3,  Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
 		                if item.Callback then pcall(item.Callback) end
 		            end)
 		
@@ -2430,11 +2440,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 		        itemValues[item.Name or idx] = itemHandle
 		    end
 		
-		    -- GridValue:Get("ItemName") -> handle { Set(), Get() }
-		    function GridValue:Get(name)
-		        return itemValues[name]
-		    end
-		
+		    function GridValue:Get(name) return itemValues[name] end
 		    return GridValue
 		end
 
