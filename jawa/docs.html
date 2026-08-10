@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SannSunner — Rayfield Docs</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0e0e10;
+    --surface:   #16161a;
+    --surface2:  #1e1e24;
+    --border:    #2a2a35;
+    --accent:    #5b8af0;
+    --accent-dim:#3a5fbb;
+    --green:     #4ade80;
+    --yellow:    #fbbf24;
+    --red:       #f87171;
+    --text:      #e2e2e8;
+    --muted:     #6b6b7a;
+    --code-bg:   #121216;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 240px;
+    min-height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    position: fixed;
+    top: 0; left: 0;
+    overflow-y: auto;
+    padding: 0 0 40px;
+    z-index: 100;
+  }
+
+  .sidebar-logo {
+    padding: 22px 20px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-badge {
+    background: var(--accent);
+    color: #fff;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+  }
+
+  .logo-title {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--text);
+  }
+
+  .sidebar-section {
+    padding: 18px 16px 4px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .sidebar a {
+    display: block;
+    padding: 7px 20px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13.5px;
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+  }
+
+  .sidebar a:hover, .sidebar a.active {
+    color: var(--text);
+    border-left-color: var(--accent);
+    background: rgba(91,138,240,0.07);
+  }
+
+  .sidebar a.active { color: var(--accent); }
+
+  /* ── MAIN ── */
+  .main {
+    margin-left: 240px;
+    flex: 1;
+    max-width: 860px;
+    padding: 48px 56px 80px;
+  }
+
+  /* ── HEADINGS ── */
+  h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 10px;
+    line-height: 1.2;
+  }
+
+  h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    margin: 52px 0 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 28px 0 10px;
+  }
+
+  .page-desc {
+    color: var(--muted);
+    font-size: 15px;
+    margin-bottom: 36px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 28px;
+  }
+
+  p { margin-bottom: 14px; color: var(--text); }
+
+  /* ── SECTION ANCHOR ── */
+  .section { margin-bottom: 16px; }
+
+  /* ── PROPS TABLE ── */
+  .props-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0 28px;
+    font-size: 13.5px;
+  }
+
+  .props-table th {
+    text-align: left;
+    padding: 8px 14px;
+    background: var(--surface2);
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .props-table td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  .props-table tr:last-child td { border-bottom: none; }
+  .props-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .prop-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    color: var(--accent);
+  }
+
+  .prop-type {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--yellow);
+  }
+
+  .prop-req {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  .req  { background: rgba(248,113,113,0.15); color: var(--red); }
+  .opt  { background: rgba(107,107,122,0.2);  color: var(--muted); }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    position: relative;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin: 16px 0 28px;
+    overflow: hidden;
+  }
+
+  .code-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .code-lang {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .copy-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .copy-btn.copied { border-color: var(--green); color: var(--green); }
+
+  pre {
+    padding: 18px 20px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.65;
+  }
+
+  /* syntax colors */
+  .kw  { color: #c792ea; }  /* keyword */
+  .fn  { color: #82aaff; }  /* function name */
+  .str { color: #c3e88d; }  /* string */
+  .num { color: #f78c6c; }  /* number */
+  .cmt { color: #546e7a; font-style: italic; }  /* comment */
+  .key { color: #ffcb6b; }  /* table key */
+  .bln { color: #f78c6c; }  /* boolean */
+
+  /* ── BADGE ── */
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-left: 8px;
+    vertical-align: middle;
+    letter-spacing: 0.03em;
+  }
+
+  .badge-new  { background: rgba(74,222,128,0.15); color: var(--green); }
+  .badge-custom { background: rgba(91,138,240,0.15); color: var(--accent); }
+
+  /* ── CALLOUT ── */
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: rgba(91,138,240,0.07);
+    padding: 12px 16px;
+    border-radius: 0 6px 6px 0;
+    margin: 16px 0 24px;
+    font-size: 13.5px;
+    color: var(--text);
+  }
+
+  .callout.warn {
+    border-left-color: var(--yellow);
+    background: rgba(251,191,36,0.07);
+  }
+
+  .callout strong { color: #fff; }
+
+  /* ── INLINE CODE ── */
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: var(--accent);
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 28px 32px;
+    margin-bottom: 40px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(91,138,240,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero h1 { font-size: 26px; margin-bottom: 8px; }
+  .hero p  { color: var(--muted); margin-bottom: 0; }
+
+  /* ── RETURNS ── */
+  .returns {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0 20px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .returns span { font-family: 'JetBrains Mono', monospace; color: var(--green); font-size: 12.5px; }
+
+  /* ── METHOD TAG ── */
+  .method-sig {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 16px;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+
+  .method-sig .fn  { color: var(--accent); font-weight: 500; }
+  .method-sig .arg { color: var(--yellow); }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 700px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; padding: 24px 20px 60px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <span class="logo-badge">SS</span>
+    <span class="logo-title">SannSunner</span>
+  </div>
+
+  <div class="sidebar-section">Getting Started</div>
+  <a href="#setup" class="active">Setup & Loadstring</a>
+  <a href="#window">CreateWindow</a>
+  <a href="#tab">CreateTab</a>
+
+  <div class="sidebar-section">Built-in Elements</div>
+  <a href="#section">CreateSection</a>
+  <a href="#paragraph">CreateParagraph</a>
+  <a href="#button">CreateButton</a>
+  <a href="#toggle">CreateToggle</a>
+  <a href="#slider">CreateSlider</a>
+  <a href="#input">CreateInput</a>
+  <a href="#dropdown">CreateDropdown</a>
+  <a href="#colorpicker">CreateColorPicker</a>
+  <a href="#keybind">CreateKeybind</a>
+
+  <div class="sidebar-section">Custom Elements</div>
+  <a href="#imagebar">CreateImageBar</a>
+  <a href="#grid">CreateGrid</a>
+
+  <div class="sidebar-section">Misc</div>
+  <a href="#notify">Notify</a>
+  <a href="#notes">Notes & Gotchas</a>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- HERO -->
+  <div class="hero">
+    <h1>SannSunner — Rayfield Docs</h1>
+    <p>Custom Rayfield mod reference. Built-in elements + CreateImageBar + CreateGrid. Biar ga lupa wkwk.</p>
+  </div>
+
+  <!-- ── SETUP ── -->
+  <section id="setup">
+    <h2>Setup & Loadstring</h2>
+    <p>Load the SannSunner modded Rayfield loader. Paste ini di atas script kamu.</p>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">lua</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="kw">local</span> RayfieldLibrary = <span class="fn">loadstring</span>(<span class="fn">game</span>:<span class="fn">HttpGet</span>(
+    <span class="str">"https://raw.githubusercontent.com/X5Dermaster/RayField-Loader/refs/heads/main/rayfieldloader.lua"</span>
+))()</pre>
+    </div>
+  </section>
+
+  <!-- ── WINDOW ── -->
+  <section id="window">
+    <h2>CreateWindow</h2>
+    <div class="method-sig"><span class="fn">RayfieldLibrary</span>:<span class="fn">CreateWindow</span>({ <span class="arg">...</span> })</div>
+    <div class="returns">returns <span>Window</span></div>
+    <table class="props-table">
+      <tr><th>Key</th><th>Type</th><th>Required</th><th>Description</th></tr>
+      <tr><td class="prop-name">Name</td><td class="prop-type">string</td><td><span class="prop-req req">Required</span></td><td>Judul window</td></tr>
+      <tr><td class="prop-name">LoadingTitle</td><td class="prop-type">string</td><td><span class="prop-req opt">Optional</span></td><td>Teks loading screen atas</td></tr>
+      <tr><td class="prop-name">LoadingSubtitle</td><td class="prop-type">string</td><td><span class="prop-req opt">Optional</span></td><td>Teks loading screen bawah</td></tr>
+      <tr><td class="prop-name">Theme</td><td class="prop-type">string</td><td><span class="prop-req opt">Optional</span></td><td><code>"Default"</code>, <code>"Ocean"</code>, <code>"Amethyst"</code>, dll</td></tr>
+      <tr><td class="prop-name">DisableRayfieldPrompts</td><td class="prop-type">boolean</td><td><span class="prop-req opt">Optional</span></td><td>Hide update prompts</td></tr>
+      <tr><td class="prop-name">ConfigurationSaving</td><td class="prop-type">table</td><td><span class="prop-req opt">Optional</span></td><td><code>{ Enabled = false }</code></td></tr>
+    </table>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">lua</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="kw">local</span> Window = RayfieldLibrary:<span class="fn">CreateWindow</span>({
+    <span class="key">Name</span>            = <span class="str">"SannSunner"</span>,
+    <span class="key">LoadingTitle</span>    = <span class="str">"SannSunner"</span>,
+    <span class="key">LoadingSubtitle</span> = <span class="str">"Loading..."</span>,
+    <span class="key">Theme</span>           = <span class="str">"Default"</span>,
+    <span class="key">DisableRayfieldPrompts</span> = <span class="bln">true</span>,
+    <span class="key">ConfigurationSaving</span> = { <span class="key">Enabled</span> = <span class="bln">false</span> },
+})</pre>
+    </div>
+  </section>
+
+  <!-- ── TAB ── -->
+  <section id="tab">
+    <h2>CreateTab</h2>
+    <div class="method-sig"><span class="fn">Window</span>:<span class="fn">CreateTab</span>(<span class="arg">Name</span>, <span class="arg">ImageId?</span>)</div>
+    <div class="returns">returns <span>Tab</span></div>
+    <div class="callout warn"><strong>Note:</strong> Semua element di-parent ke <code>TabPage</code> yang ada di dalam Tab closure. Pastiin <code>Tab:CreateImageBar</code> dan <code>Tab:CreateGrid</code> di-define di dalam source loader bukan di luar.</div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">lua</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="kw">local</span> Tab = Window:<span class="fn">CreateTab</span>(<span class="str">"Main"</span>, <span class="bln">nil</span>)</pre>
+    </div>
+  </section>
+
+  <!-- ── SECTION ── -->
+  <section id="section">
+    <h2>CreateSection</h2>
+    <div class="method-sig"><span class="fn">Tab</span>:<span class="fn">CreateSection</span>(<span class="arg">Name</span>)</div>
+    <div class="callout"><strong>Fix applied:</strong> TabPage sekarang punya <code>UIPadding PaddingTop = 4px</code> biar UIStroke element pertama ga kepotong ScrollingFrame. Tambahin ini setelah <code>TabPage.Parent = Elements</code> di source.</div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">lua</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="cmt">-- Paste setelah TabPage.Parent = Elements di source loader</span>
+<span class="kw">local</span> TopPad = Instance.<span class="fn">new</span>(<span class="str">"UIPadding"</span>)
+TopPad.<span class="key">PaddingTop</span>    = UDim.<span class="fn">new</span>(<span class="num">0</span>, <span class="num">4</span>)
+TopPad.<span class="key">PaddingBottom</span> = UDim.<span class="fn">new</span>(<span class="num">0</span>, <span class="num">12</span>)
+TopPad.<span class="key">Parent</span>        = TabPage
+
+<span class="cmt">-- Usage</span>
+Tab:<span class="fn">CreateSection</span>(<span class="str">"Settings"</span>)</pre>
+    </div>
+  </section>
+
+  <!-- ── PARAGRAPH ── -->
+  <section id="paragraph">
+    <h2>CreateParagraph</h2>
+    <div class="method-sig"><span class="fn">Tab</span>:<span class="fn">CreateParagraph</span>({ <span class="arg">...</span> })</div>
+    <table class="props-table">
+      <tr><th>Key</th><th>Type</th><th>Required</th><th>Description</th></tr>
+      <tr><td class="prop-name">Title</td><td class="prop-type">string</td><td><span class="prop-req req">Required</span></td><td>Judul bold</td></tr>
+      <tr><td class="prop-name">Content</td><td class="prop-type">string</td><td><span class="prop-req req">Required</span></td><td>Isi teks, support <code>\n</code></td></tr>
+    </table>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">lua</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre>Tab:<span class="fn">CreateParagraph</span>({
+    <span class="key">Title</span>   = <span class="str">"Info"</span>,
+    <span class="key">Content</span> = <span class="str">"Place ID : 123\nJob ID : abc-def"</span>,
+})</pre>
+    </div>
+  </section>
+
+  <!-- ── BUTTON ── -->
+  <section id="button">
+    <h2>CreateButton</h2>
+    <div class="method-sig"><span class="fn">Tab</span>:<span class="fn">CreateButton</span>({ <span class="arg">...</span> })</div>
+    <table class="props-table">
+      <tr><th>Key</th><th>Type</th><th>Required</th><th>Description</th></tr>
+      <tr><td class="prop-name">Name</td><td class="prop-type">string</td><td><span class="prop-req req">Required</span></td><td>Label button</td></tr>
+      <tr><td class="prop-name">Callback</td><td class="prop-type">function</td><td><span class="prop-req req">Required</span></td><td>Dipanggil waktu diklik</td></tr>
+    </table>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">lua</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre>Tab:<span class="fn">CreateButton</span>({
+    <span class="key">Name</span>     = <span class="str">"Teleport Home"</span>,
+    <span class="key">Callback</span> = <span class="kw">function</span>()
+        <span class="cmt">-- logic here</span>
+    <span class="kw">end</span>,
+})</pre>
+    </div>
+  </section>
+
+  <!-- ── TOGGLE ── -->
+  <section id="toggle">
+    <h2>CreateToggle</h2>
+    <div class="method-sig"><span class="fn">Tab</span>:<span class="fn">CreateToggle</span>({ <span class="arg">...</span> })</div>
+    <div class="returns">returns <span>Toggle { Set(bool) }</span></div>
+    <table class="props-table">
+      <tr><th>Key</th><th>Type</th><th>Required</th><th>Description</th></tr>
+      <tr><td class="prop-name">Name</td><td class="prop-type">string</td><td><span class="prop-req req">Required</span></td><td>Label</td></tr>
+      <tr><td class="prop-name">CurrentValue</td><td class="prop-type">boolean</td><td><span class="prop-req req">Required</span></td><td>State awal</td></tr>
+      <tr><td class="prop-name">Flag</td><td class="prop-type">string</td><td><span class="prop-req opt">Optional</span></td><td>Key buat save config</td></tr>
+      <tr><td class="prop-name">Callback</td><td class="prop-type">function(bool)</td><td><span class="prop-req req">Required</span></td><td>Dipanggil waktu toggle berubah</td></tr>
+    </table>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">lua</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="kw">local</span> flyToggle = Tab:<span class="fn">CreateToggle</span>({
+    <span class="key">Name</span>         = <span class="str">"Fly"</span>,
+    <span class="key">CurrentValue</span> = <span class="bln">false</span>,
+    <span class="key">Flag</span>         = <span class="str">"FlyToggle"</span>,
+    <span class="key">Callback</span>     = <span class="kw">function</span>(v)
+        <span class="fn">onFlyToggle</span>(v)
+    <span class="kw">end</span>,
+})
+
+<span class="cmt">-- runtime</span>
+flyToggle:<span class="fn">Set</span>(<span class="bln">true</span>)</pre>
+    </div>
+  </section>
+
+  <!-- ── SLIDER ── -->
+  <section id="slider">
+    <h2>CreateSlider</h2>
+    <div class="method-sig"><span class="fn">Tab</span>:<span class="fn">CreateSlider</span>({ <span class="arg">...</span> })</div>
+    <div class="returns">returns <span>Slider { Set(number) }</span></div>
+    <table class="props-table">
+      <tr><th>Key</th><th>Type</th><th>Required</th><th>Description</th></tr>
+      <tr><td class="prop-name">Name</td><td class="prop-type">string</td><td><span class="prop-req req">Required</span></td><td>Label</td></tr>
+      <tr><td class="prop-name">Range</td><td class="prop-type">{min, max}</td><td><span class="prop-req req">Required</span></td><td>Range nilai</td></tr>
+      <tr><td class="prop-name">Increment</td><td class="prop-type">number</td><td><span class="prop-req req">Required</span></td><td>Step size</td></tr>
+      <tr><td class="prop-name">CurrentValue</td><td class="prop-type">number</td><td><span class="prop-req req">Required</span></td><td>Nilai awal</td></tr>
+      <tr><td class="prop-name">Flag</td><td class="prop-type">string</td><td><span class="prop-req opt">Optional</span></td><td>Key config</td></tr>
+      <tr><td class="prop-name">Callback</td><td class="prop-type">function(number)</td><td><span class="prop-req req">Required</span></td><td>Dipanggil waktu value berubah</td></tr>
+    </table>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">lua</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="kw">local</span> speedSlider = Tab:<span class="fn">CreateSlider</span>({
+    <span class="key">Name</span>         = <span class="str">"Fly Speed"</span>,
+    <span class="key">Range</span>        = {<span class="num">10</span>, <span class="num">500</span>},
+    <span class="key">Increment</span>    = <span class="num">10</span>,
+    <span class="key">CurrentValue</span> = <span class="num">50</span>,
+    <span class="key">Flag</span>         = <span class="str">"FlySpeed"</span>,
+    <span class="key">Callback</span>     = <span class="kw">function</span>(v)
+        FLY_SPEED = v
+    <span class="kw">end</span>,
+})
+
+speedSlider:<span class="fn">Set</span>(<span class="num">200</span>)</pre>
+    </div>
+  </section>
+
+  <!-- ── INPUT ── -->
+  <section id="input">
+    <h2>CreateInput</h2>
+    <div class="method-sig"><span class="fn">Tab</span>:<span class="fn">CreateInput</span>({ <span class="arg">...</span> })</div>
+    <table class="props-table">
+      <tr><th>Key</th><th>Type</th><th>Required</th><th>Description</th></tr>
+      <tr><td class="prop-name">Name</td><td class="prop-type">string</td><td><span class="prop-req req">Required</span></td><td>Label</td></tr>
+      <tr><td class="prop-name">PlaceholderText</td><td class="prop-type">string</td><td><span class="prop-req opt">Optional</span></td><td>Placeholder</td></tr>
+      <tr><td class="prop-name">Numbers</td><td class="prop-type">boolean</td><td><span class="prop-req opt">Optional</span></td><td>Numerik only</td></tr>
+      <tr><td class="prop-name">OnEnter</td><td class="prop-type">boolean</td><td><span class="prop-req opt">Optional</span></td><td>Fire callback pas Enter</td></tr>
+      <tr><td class="prop-name">Callback</td><td class="prop-type">function(string)</td><td><span class="prop-req req">Required</span></td><td>Value saat submit</td></tr>
+    </table>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">lua</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre>Tab:<span class="fn">CreateInput</span>({
+    <span class="key">Name</span>            = <span class="str">"Discord ID"</span>,
+    <span class="key">PlaceholderText</span> = <span class="str">"Enter ID..."</span>,
+    <span class="key">OnEnter</span>         = <span class="bln">true</span>,
+    <span class="key">Callback</span>        = <span class="kw">function</span>(v)
+        <span class="fn">print</span>(v)
+    <span class="kw">end</span>,
+})</pre>
+    </div>
+  </section>
+
+  <!-- ── DROPDOWN ── -->
+  <section id="dropdown">
+    <h2>CreateDropdown</h2>
+    <div class="method-sig"><span class="fn">Tab</span>:<span class="fn">CreateDropdown</span>({ <span class="arg">...</span> })</div>
+    <div class="returns">returns <span>Dropdown { Set(string|table) }</span></div>
+    <table class="props-table">
+      <tr><th>Key</th><th>Type</th><th>Required</th><th>Description</th></tr>
+      <tr><td class="prop-name">Name</td><td class="prop-type">string</td><td><span class="prop-req req">Required</span></td><td>Label</td></tr>
+      <tr><td class="prop-name">Options</td><td class="prop-type">string[]</td><td><span class="prop-req req">Required</span></td><td>List pilihan</td></tr>
+      <tr><td class="prop-name">CurrentOption</td><td class="prop-type">string|table</td><td><span class="prop-req opt">Optional</span></td><td>Pilihan awal. <code>{}</code> buat multi</td></tr>
+      <tr><td class="prop-name">MultipleOptions</td><td class="prop-type">boolean</td><td><span class="prop-req opt">Optional</span></td><td>Multi-select mode</td></tr>
+      <tr><td class="prop-name">Callback</td><td class="prop-type">function(string|table)</td><td><span class="prop-req req">Required</span></td><td>Value yang dipilih</td></tr>
+    </table>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">lua</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="kw">local</span> dd = Tab:<span class="fn">CreateDropdown</span>({
+    <span class="key">Name</span>          = <span class="str">"Map"</span>,
+    <span class="key">Options</span>       = {<span class="str">"Lobby"</span>, <span class="str">"Jawa Timur"</span>, <span class="str">"Bali"</span>},
+    <span class="key">CurrentOption</span> = <span class="str">"Lobby"</span>,
+    <span class="key">Callback</span>      = <span class="kw">function</span>(v)
+        <span class="fn">print</span>(v)
+    <span class="kw">end</span>,
+})
+
+dd:<span class="fn">Set</span>(<span class="str">"Jawa Timur"</span>)</pre>
+    </div>
+  </section>
+
+  <!-- ── COLORPICKER ── -->
+  <section id="colorpicker">
+    <h2>CreateColorPicker</h2>
+    <div class="method-sig"><span class="fn">Tab</span>:<span class="fn">CreateColorPicker</span>({ <span class="arg">...</span> })</div>
+    <table class="props-table">
+      <tr><th>Key</th><th>Type</th><th>Required</th><th>Description</th></tr>
+      <tr><td class="prop-name">Name</td><td class="prop-type">string</td><td><span class="prop-req req">Required</span></td><td>Label</td></tr>
+      <tr><td class="prop-name">Color</td><td class="prop-type">Color3</td><td><span class="prop-req opt">Optional</span></td><td>Warna awal</td></tr>
+      <tr><td class="prop-name">Flag</td><td class="prop-type">string</td><td><span class="prop-req opt">Optional</span></td><td>Key config</td></tr>
+      <tr><td class="prop-name">Callback</td><td class="prop-type">function(Color3)</td><td><span class="prop-req req">Required</span></td><td>Warna yang dipilih</td></tr>
+    </table>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">lua</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre>Tab:<span class="fn">CreateColorPicker</span>({
+    <span class="key">Name</span>     = <span class="str">"ESP Color"</span>,
+    <span class="key">Color</span>    = Color3.<span class="fn">fromRGB</span>(<span class="num">255</span>, <span class="num">0</span>, <span class="num">0</span>),
+    <span class="key">Flag</span>     = <span class="str">"ESPColor"</span>,
+    <span class="key">Callback</span> = <span class="kw">function</span>(v)
+        espColor = v
+    <span class="kw">end</span>,
+})</pre>
+    </div>
+  </section>
+
+  <!-- ── KEYBIND ── -->
+  <section id="keybind">
+    <h2>CreateKeybind</h2>
+    <div class="method-sig"><span class="fn">Tab</span>:<span class="fn">CreateKeybind</span>({ <span class="arg">...</span> })</div>
+    <table class="props-table">
+      <tr><th>Key</th><th>Type</th><th>Required</th><th>Description</th></tr>
+      <tr><td class="prop-name">Name</td><td class="prop-type">string</td><td><span class="prop-req req">Required</span></td><td>Label</td></tr>
+      <tr><td class="prop-name">CurrentKeybind</td><td class="prop-type">string</td><td><span class="prop-req req">Required</span></td><td>Key default, e.g. <code>"F"</code></td></tr>
+      <tr><td class="prop-name">HoldToInteract</td><td class="prop-type">boolean</td><td><span class="prop-req opt">Optional</span></td><td>Hold mode</td></tr>
+      <tr><td class="prop-name">Flag</td><td class="prop-type">string</td><td><span class="prop-req opt">Optional</span></td><td>Key config</td></tr>
+      <tr><td class="prop-name">Callback</td><td class="prop-type">function</td><td><span class="prop-req req">Required</span></td><td>Fired waktu key dipencet</td></tr>
+    </table>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">lua</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre>Tab:<span class="fn">CreateKeybind</span>({
+    <span class="key">Name</span>           = <span class="str">"Toggle Fly"</span>,
+    <span class="key">CurrentKeybind</span> = <span class="str">"F"</span>,
+    <span class="key">HoldToInteract</span> = <span class="bln">false</span>,
+    <span class="key">Flag</span>           = <span class="str">"FlyKey"</span>,
+    <span class="key">Callback</span>       = <span class="kw">function</span>()
+        <span class="fn">toggleFly</span>()
+    <span class="kw">end</span>,
+})</pre>
+    </div>
+  </section>
+
+  <!-- ── IMAGEBAR ── -->
+  <section id="imagebar">
+    <h2>CreateImageBar <span class="badge badge-custom">Custom</span></h2>
+    <div class="method-sig"><span class="fn">Tab</span>:<span class="fn">CreateImageBar</span>({ <span class="arg">...</span> })</div>
+    <div class="returns">returns <span>ImageBar { Set(url?, title?, content?) }</span></div>
+    <div class="callout warn"><strong>Important:</strong> Function ini harus di-define di dalam source loader, di scope yang sama dengan <code>CreateButton</code> (biar bisa akses <code>TabPage</code>, <code>SelectedTheme</code>, <code>TweenService</code>).</div>
+    <table class="props-table">
+      <tr><th>Key</th><th>Type</th><th>Required</th><th>Description</th></tr>
+      <tr><td class="prop-name">Name</td><td class="prop-type">string</td><td><span class="prop-req req">Required</span></td><td>Nama element (unik)</td></tr>
+      <tr><td class="prop-name">ImageUrl</td><td class="prop-type">string</td><td><span class="prop-req opt">Optional</span></td><td>URL gambar (external HTTP). Kosong string kalo mau load async via <code>:Set()</code></td></tr>
+      <tr><td class="prop-name">XSize</td><td class="prop-type">number</td><td><span class="prop-req req">Required</span></td><td>Lebar gambar dalam pixel</td></tr>
+      <tr><td class="prop-name">YSize</td><td class="prop-type">number</td><td><span class="prop-req req">Required</span></td><td>Tinggi gambar dalam pixel</td></tr>
+      <tr><td class="prop-name">CornerRadius</td><td class="prop-type">number</td><td><span class="prop-req opt">Optional</span></td><td>Border radius gambar. <code>YSize/2</code> buat lingkaran</td></tr>
+      <tr><td class="prop-name">Align</td><td class="prop-type">string</td><td><span class="prop-req opt">Optional</span></td><td><code>"Left"</code> / <code>"Center"</code> / <code>"Right"</code>. Auto <code>"Left"</code> kalo ada Title</td></tr>
+      <tr><td class="prop-name">Title</td><td class="prop-type">string</td><td><span class="prop-req opt">Optional</span></td><td>Teks judul di kanan gambar (GothamSemibold 13)</td></tr>
+      <tr><td class="prop-name">Content</td><td class="prop-type">string</td><td><span class="prop-req opt">Optional</span></td><td>Teks kecil di bawah Title (Gotham 12)</td></tr>
+    </table>
+
+    <h3>Download flow</h3>
+    <p>External URL ga bisa langsung masuk <code>ImageLabel.Image</code>. Flow-nya: <code>game:HttpGet(url)</code> → <code>writefile()</code> → <code>getcustomasset()</code> → set ke ImageLabel. Semua di dalam <code>task.spawn</code> biar non-blocking.</p>
+
+    <div class="callout"><strong>Tip:</strong> Pass <code>ImageUrl = ""</code> waktu create, terus panggil <code>:Set(url)</code> setelah element ada — ini penting kalo URL-nya perlu di-fetch dulu (kayak Discord avatar yang butuh request ke API).</div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">lua</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="cmt">-- Avatar dengan Title + Content</span>
+<span class="kw">local</span> avatarBar = Tab:<span class="fn">CreateImageBar</span>({
+    <span class="key">Name</span>         = <span class="str">"DiscordAvatar"</span>,
+    <span class="key">ImageUrl</span>     = <span class="str">""</span>,  <span class="cmt">-- kosong dulu</span>
+    <span class="key">XSize</span>        = <span class="num">46</span>,
+    <span class="key">YSize</span>        = <span class="num">46</span>,
+    <span class="key">CornerRadius</span> = <span class="num">23</span>,  <span class="cmt">-- lingkaran</span>
+    <span class="key">Title</span>        = DataUser.DiscordUsername,
+    <span class="key">Content</span>      = <span class="str">"SannSunner Member"</span>,
+})
+
+<span class="cmt">-- Load async setelah element ada</span>
+task.<span class="fn">spawn</span>(<span class="kw">function</span>()
+    <span class="fn">getGameIcon</span>(placeid)  <span class="cmt">-- panggil :Set() di dalam</span>
+<span class="kw">end</span>)
+
+<span class="cmt">-- Runtime update</span>
+avatarBar:<span class="fn">Set</span>(newUrl, newTitle, newContent)
+
+<span class="cmt">-- Logo game (tanpa title)</span>
+<span class="kw">local</span> gameImg = Tab:<span class="fn">CreateImageBar</span>({
+    <span class="key">Name</span>         = <span class="str">"GameLogo"</span>,
+    <span class="key">ImageUrl</span>     = <span class="str">""</span>,
+    <span class="key">XSize</span>        = <span class="num">64</span>,
+    <span class="key">YSize</span>        = <span class="num">64</span>,
+    <span class="key">CornerRadius</span> = <span class="num">6</span>,
+    <span class="key">Align</span>        = <span class="str">"Center"</span>,
+})</pre>
+    </div>
+
+    <h3>Gotchas</h3>
+    <div class="callout warn"><strong>UIStroke dummy:</strong> <code>setElementsVisible</code> di Rayfield akses <code>element.Title</code> dan <code>element.UIStroke</code> langsung tanpa FindFirstChild. ImageBar harus punya TextLabel bernama <code>"Title"</code> dan UIStroke bernama <code>"UIStroke"</code> sebagai direct child, walaupun kosong/invisible.</div>
+    <div class="callout warn"><strong>Theme key:</strong> <code>SelectedTheme.ElementBorder</code> ga exist — yang bener <code>SelectedTheme.ElementStroke</code>.</div>
+  </section>
+
+  <!-- ── GRID ── -->
+  <section id="grid">
+    <h2>CreateGrid <span class="badge badge-custom">Custom</span></h2>
+    <div class="method-sig"><span class="fn">Tab</span>:<span class="fn">CreateGrid</span>({ <span class="arg">...</span> })</div>
+    <div class="returns">returns <span>GridValue { Get(name) → { Set(bool), Get() } }</span></div>
+    <div class="callout warn"><strong>Important:</strong> Sama kayak CreateImageBar — harus di-define di dalam source loader scope yang sama dengan CreateButton.</div>
+    <table class="props-table">
+      <tr><th>Key</th><th>Type</th><th>Required</th><th>Description</th></tr>
+      <tr><td class="prop-name">Name</td><td class="prop-type">string</td><td><span class="prop-req req">Required</span></td><td>Nama container</td></tr>
+      <tr><td class="prop-name">Columns</td><td class="prop-type">number</td><td><span class="prop-req opt">Optional</span></td><td>Jumlah kolom (default <code>2</code>)</td></tr>
+      <tr><td class="prop-name">Type</td><td class="prop-type">string</td><td><span class="prop-req opt">Optional</span></td><td>Default type semua item: <code>"Toggle"</code> atau <code>"Button"</code></td></tr>
+      <tr><td class="prop-name">Items</td><td class="prop-type">table[]</td><td><span class="prop-req req">Required</span></td><td>List item (lihat bawah)</td></tr>
+    </table>
+
+    <h3>Item properties</h3>
+    <table class="props-table">
+      <tr><th>Key</th><th>Type</th><th>Description</th></tr>
+      <tr><td class="prop-name">Name</td><td class="prop-type">string</td><td>Label + key buat <code>:Get()</code></td></tr>
+      <tr><td class="prop-name">Type</td><td class="prop-type">string</td><td>Per-item override: <code>"Toggle"</code> atau <code>"Button"</code></td></tr>
+      <tr><td class="prop-name">CurrentValue</td><td class="prop-type">boolean</td><td>State awal (Toggle only)</td></tr>
+      <tr><td class="prop-name">Callback</td><td class="prop-type">function</td><td>Toggle: <code>function(bool)</code> — Button: <code>function()</code></td></tr>
+    </table>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">lua</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="cmt">-- Mixed types per item</span>
+<span class="kw">local</span> grid = Tab:<span class="fn">CreateGrid</span>({
+    <span class="key">Name</span>    = <span class="str">"Loadout"</span>,
+    <span class="key">Columns</span> = <span class="num">2</span>,
+    <span class="key">Items</span>   = {
+        { <span class="key">Name</span> = <span class="str">"Aimbot"</span>,    <span class="key">Type</span> = <span class="str">"Toggle"</span>, <span class="key">CurrentValue</span> = <span class="bln">true</span>,  <span class="key">Callback</span> = <span class="kw">function</span>(v) <span class="kw">end</span> },
+        { <span class="key">Name</span> = <span class="str">"Teleport"</span>,  <span class="key">Type</span> = <span class="str">"Button"</span>,                       <span class="key">Callback</span> = <span class="kw">function</span>()  <span class="kw">end</span> },
+        { <span class="key">Name</span> = <span class="str">"ESP"</span>,       <span class="key">Type</span> = <span class="str">"Toggle"</span>, <span class="key">CurrentValue</span> = <span class="bln">false</span>, <span class="key">Callback</span> = <span class="kw">function</span>(v) <span class="kw">end</span> },
+        { <span class="key">Name</span> = <span class="str">"Kill All"</span>, <span class="key">Type</span> = <span class="str">"Button"</span>,                       <span class="key">Callback</span> = <span class="kw">function</span>()  <span class="kw">end</span> },
+    },
+})
+
+<span class="cmt">-- Runtime: get handle per item</span>
+grid:<span class="fn">Get</span>(<span class="str">"Aimbot"</span>):<span class="fn">Set</span>(<span class="bln">false</span>)
+<span class="fn">print</span>(grid:<span class="fn">Get</span>(<span class="str">"ESP"</span>):<span class="fn">Get</span>())  <span class="cmt">-- current state</span></pre>
+    </div>
+
+    <h3>Layout gotcha</h3>
+    <div class="callout warn"><strong>UIGridLayout + dummy Title:</strong> dummy <code>Title</code> TextLabel TIDAK boleh jadi direct child Grid (dia akan di-layout sebagai slot kosong). Fix: taruh UIGridLayout + semua Cell di inner Frame <code>"GridInner"</code>. Grid outer cuma pegang <code>UIStroke</code> + <code>Title</code> buat <code>setElementsVisible</code>.</div>
+  </section>
+
+  <!-- ── NOTIFY ── -->
+  <section id="notify">
+    <h2>Notify</h2>
+    <div class="method-sig"><span class="fn">RayfieldLibrary</span>:<span class="fn">Notify</span>({ <span class="arg">...</span> })</div>
+    <table class="props-table">
+      <tr><th>Key</th><th>Type</th><th>Required</th><th>Description</th></tr>
+      <tr><td class="prop-name">Title</td><td class="prop-type">string</td><td><span class="prop-req req">Required</span></td><td>Judul notif</td></tr>
+      <tr><td class="prop-name">Content</td><td class="prop-type">string</td><td><span class="prop-req req">Required</span></td><td>Isi notif</td></tr>
+      <tr><td class="prop-name">Duration</td><td class="prop-type">number</td><td><span class="prop-req opt">Optional</span></td><td>Durasi detik (default auto)</td></tr>
+      <tr><td class="prop-name">Image</td><td class="prop-type">number</td><td><span class="prop-req opt">Optional</span></td><td>rbxassetid icon</td></tr>
+    </table>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">lua</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre>RayfieldLibrary:<span class="fn">Notify</span>({
+    <span class="key">Title</span>    = <span class="str">"System"</span>,
+    <span class="key">Content</span>  = <span class="str">"Copied to clipboard."</span>,
+    <span class="key">Duration</span> = <span class="num">3</span>,
+})</pre>
+    </div>
+  </section>
+
+  <!-- ── NOTES ── -->
+  <section id="notes">
+    <h2>Notes & Gotchas</h2>
+
+    <h3>setElementsVisible requirements</h3>
+    <p>Setiap custom Frame yang jadi direct child TabPage HARUS punya:</p>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">lua</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="cmt">-- 1. UIStroke bernama "UIStroke"</span>
+<span class="kw">local</span> s = Instance.<span class="fn">new</span>(<span class="str">"UIStroke"</span>)
+s.<span class="key">Name</span> = <span class="str">"UIStroke"</span>
+s.<span class="key">Parent</span> = MyFrame
+
+<span class="cmt">-- 2. TextLabel bernama "Title"</span>
+<span class="kw">local</span> t = Instance.<span class="fn">new</span>(<span class="str">"TextLabel"</span>)
+t.<span class="key">Name</span>              = <span class="str">"Title"</span>
+t.<span class="key">Text</span>              = <span class="str">""</span>
+t.<span class="key">Size</span>              = UDim2.<span class="fn">new</span>(<span class="num">0</span>,<span class="num">0</span>,<span class="num">0</span>,<span class="num">0</span>)
+t.<span class="key">BackgroundTransparency</span> = <span class="num">1</span>
+t.<span class="key">TextTransparency</span>  = <span class="num">1</span>
+t.<span class="key">Visible</span>           = <span class="bln">false</span>
+t.<span class="key">Parent</span>            = MyFrame
+
+<span class="cmt">-- 3. Attributes buat transparency target</span>
+MyFrame:<span class="fn">SetAttribute</span>(<span class="str">"BackgroundTransparencyTarget"</span>, <span class="num">0</span>)
+MyFrame:<span class="fn">SetAttribute</span>(<span class="str">"UIStrokeTransparencyTarget"</span>,   <span class="num">0</span>)
+MyFrame:<span class="fn">SetAttribute</span>(<span class="str">"TitleTextTransparencyTarget"</span>,  <span class="num">1</span>)</pre>
+    </div>
+
+    <h3>Theme keys yang valid</h3>
+    <table class="props-table">
+      <tr><th>Key</th><th>Description</th></tr>
+      <tr><td class="prop-name">ElementBackground</td><td>Background element</td></tr>
+      <tr><td class="prop-name">ElementBackgroundHover</td><td>Hover state background</td></tr>
+      <tr><td class="prop-name">ElementStroke</td><td>Border warna (<strong>bukan</strong> ElementBorder)</td></tr>
+      <tr><td class="prop-name">TextColor</td><td>Warna teks utama</td></tr>
+      <tr><td class="prop-name">ToggleColor</td><td>Warna toggle ON</td></tr>
+      <tr><td class="prop-name">TabBackground</td><td>Tab button background</td></tr>
+      <tr><td class="prop-name">TabStroke</td><td>Tab button border</td></tr>
+    </table>
+
+    <h3>External image loading</h3>
+    <div class="callout warn"><code>ImageLabel.Image</code> ga bisa load HTTP URL langsung. Wajib: <code>game:HttpGet(url)</code> → <code>writefile(path, body)</code> → <code>getcustomasset(path)</code> → set ke Image property. Semua di dalam <code>task.spawn</code>.</div>
+
+    <h3>Platform detection</h3>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">lua</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="kw">local</span> ok, platform = <span class="fn">pcall</span>(<span class="kw">function</span>()
+    <span class="kw">return</span> UserInputService:<span class="fn">GetPlatform</span>()
+<span class="kw">end</span>)
+
+<span class="kw">local</span> isPC = UserInputService.<span class="key">KeyboardEnabled</span>
+         <span class="kw">and</span> <span class="kw">not</span> UserInputService.<span class="key">TouchEnabled</span>
+
+<span class="kw">local</span> isMobile = UserInputService.<span class="key">TouchEnabled</span>
+             <span class="kw">and</span> <span class="kw">not</span> UserInputService.<span class="key">KeyboardEnabled</span>
+
+<span class="kw">if</span> <span class="kw">not</span> isPC <span class="kw">and</span> <span class="kw">not</span> isMobile <span class="kw">then</span>
+    <span class="fn">warn</span>(<span class="str">"Platform tidak dikenali"</span>)
+<span class="kw">end</span></pre>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // copy button
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    const text = pre.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+
+  // active sidebar link on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const links    = document.querySelectorAll('.sidebar a[href^="#"]');
+
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.sidebar a[href="#${e.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>
