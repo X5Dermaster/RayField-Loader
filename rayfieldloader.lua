@@ -2108,6 +2108,12 @@ function RayfieldLibrary:CreateWindow(Settings)
 		end
 
 		TabPage.Parent = Elements
+
+		local TopPad = Instance.new("UIPadding")
+		TopPad.PaddingTop    = UDim.new(0, 4)
+		TopPad.PaddingBottom = UDim.new(0, 12)
+		TopPad.Parent        = TabPage
+				
 		if not FirstTab and not Ext then
 			Elements.UIPageLayout.Animated = false
 			Elements.UIPageLayout:JumpTo(TabPage)
