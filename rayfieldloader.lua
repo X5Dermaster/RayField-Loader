@@ -1437,9 +1437,9 @@ local function Hide(notify: boolean?)
 	Debounce = true
 	if notify then
 		if useMobilePrompt then 
-			RayfieldLibrary:Notify({Title = "Interface Hidden", Content = "The interface has been hidden, you can unhide the interface by tapping 'Show'.", Duration = 7, Image = 4400697855})
+			-- RayfieldLibrary:Notify({Title = "Interface Hidden", Content = "The interface has been hidden, you can unhide the interface by tapping 'Show'.", Duration = 7, Image = 4400697855})
 		else
-			RayfieldLibrary:Notify({Title = "Interface Hidden", Content = "The interface has been hidden, you can unhide the interface by tapping " .. tostring(getSetting("General", "rayfieldOpen")) .. ".", Duration = 7, Image = 4400697855})
+			-- RayfieldLibrary:Notify({Title = "Interface Hidden", Content = "The interface has been hidden, you can unhide the interface by tapping " .. tostring(getSetting("General", "rayfieldOpen")) .. ".", Duration = 7, Image = 4400697855})
 		end
 	end
 
@@ -2247,13 +2247,13 @@ function RayfieldLibrary:CreateWindow(Settings)
 		end
 
 		function Tab:CreateGrid(GridSettings)
-		    local GridValue = {}
-		
+		    local GridValue  = {}
 		    local columns    = GridSettings.Columns or 2
 		    local itemType   = GridSettings.Type or "Toggle"
 		    local items      = GridSettings.Items or {}
 		    local itemValues = {}
 		
+		    -- outer frame — ini yang didetect setElementsVisible sebagai "element"
 		    local Grid = Instance.new("Frame")
 		    Grid.Name               = GridSettings.Name or "Grid"
 		    Grid.Size               = UDim2.new(1, -10, 0, 0)
@@ -2262,7 +2262,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 		    Grid.BorderSizePixel    = 0
 		    Grid.Parent             = TabPage
 		
-		    -- REQUIRED by setElementsVisible
+		    -- REQUIRED by setElementsVisible — direct children of Grid
 		    local GridUIStroke = Instance.new("UIStroke")
 		    GridUIStroke.Name        = "UIStroke"
 		    GridUIStroke.Transparency = 1
@@ -2281,39 +2281,48 @@ function RayfieldLibrary:CreateWindow(Settings)
 		    Grid:SetAttribute("UIStrokeTransparencyTarget",   1)
 		    Grid:SetAttribute("TitleTextTransparencyTarget",  1)
 		
+		    -- INNER container — UIGridLayout hidup di sini
+		    -- Title TextLabel TIDAK masuk sini, jadi ga ke-layout sama UIGridLayout
+		    local Inner = Instance.new("Frame")
+		    Inner.Name               = "GridInner"
+		    Inner.Size               = UDim2.new(1, 0, 0, 0)
+		    Inner.AutomaticSize      = Enum.AutomaticSize.Y
+		    Inner.BackgroundTransparency = 1
+		    Inner.BorderSizePixel    = 0
+		    Inner.Parent             = Grid
+		
 		    local UIGrid = Instance.new("UIGridLayout")
-		    UIGrid.CellSize             = UDim2.new(1 / columns, -6, 0, 42)
-		    UIGrid.CellPadding          = UDim2.new(0, 6, 0, 6)
-		    UIGrid.FillDirection        = Enum.FillDirection.Horizontal
-		    UIGrid.HorizontalAlignment  = Enum.HorizontalAlignment.Left
-		    UIGrid.SortOrder            = Enum.SortOrder.LayoutOrder
-		    UIGrid.Parent               = Grid
+		    UIGrid.CellSize            = UDim2.new(1 / columns, -6, 0, 42)
+		    UIGrid.CellPadding         = UDim2.new(0, 6, 0, 6)
+		    UIGrid.FillDirection       = Enum.FillDirection.Horizontal
+		    UIGrid.HorizontalAlignment = Enum.HorizontalAlignment.Left
+		    UIGrid.SortOrder           = Enum.SortOrder.LayoutOrder
+		    UIGrid.Parent              = Inner
 		
 		    local UIPad = Instance.new("UIPadding")
 		    UIPad.PaddingBottom = UDim.new(0, 6)
-		    UIPad.Parent        = Grid
+		    UIPad.Parent        = Inner
 		
 		    local accentColor = SelectedTheme.ToggleColor
 		        or SelectedTheme.SystemAccentColorDark3
 		        or Color3.fromRGB(50, 138, 220)
 		
 		    for idx, item in ipairs(items) do
+		        -- Cell di-parent ke Inner, bukan Grid
 		        local Cell = Instance.new("Frame")
 		        Cell.Name               = item.Name or ("Item" .. idx)
 		        Cell.BackgroundColor3   = SelectedTheme.ElementBackground
 		        Cell.BackgroundTransparency = 1
 		        Cell.BorderSizePixel    = 0
 		        Cell.LayoutOrder        = idx
-		        Cell.Parent             = Grid
+		        Cell.Parent             = Inner   -- <-- Inner bukan Grid
 		
-		        -- REQUIRED: setElementsVisible akses element.UIStroke langsung
 		        local CellStroke = Instance.new("UIStroke")
 		        CellStroke.Name         = "UIStroke"
 		        CellStroke.Color        = SelectedTheme.ElementStroke
 		        CellStroke.Transparency = 1
 		        CellStroke.Parent       = Cell
 		
-		        -- REQUIRED: setElementsVisible akses element.Title langsung
 		        local CellTitle = Instance.new("TextLabel")
 		        CellTitle.Name               = "Title"
 		        CellTitle.Text               = ""
@@ -2323,7 +2332,6 @@ function RayfieldLibrary:CreateWindow(Settings)
 		        CellTitle.Visible            = false
 		        CellTitle.Parent             = Cell
 		
-		        -- attributes buat transparency target
 		        Cell:SetAttribute("BackgroundTransparencyTarget", 0)
 		        Cell:SetAttribute("UIStrokeTransparencyTarget",   0)
 		        Cell:SetAttribute("TitleTextTransparencyTarget",  1)
@@ -2346,9 +2354,9 @@ function RayfieldLibrary:CreateWindow(Settings)
 		        Label.TextTruncate       = Enum.TextTruncate.AtEnd
 		        Label.Parent             = Cell
 		
-		        TweenService:Create(Cell,        TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {BackgroundTransparency = 0}):Play()
-		        TweenService:Create(CellStroke,  TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {Transparency = 0}):Play()
-		        TweenService:Create(Label,       TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {TextTransparency = 0}):Play()
+		        TweenService:Create(Cell,       TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {BackgroundTransparency = 0}):Play()
+		        TweenService:Create(CellStroke, TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {Transparency = 0}):Play()
+		        TweenService:Create(Label,      TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {TextTransparency = 0}):Play()
 		
 		        local itemHandle = {}
 		
@@ -2375,7 +2383,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 		            Knob.Size             = UDim2.new(0, 14, 0, 14)
 		            Knob.Position         = toggled
 		                and UDim2.new(1, -17, 0.5, -7)
-		                or  UDim2.new(0, 3,   0.5, -7)
+		                or  UDim2.new(0,  3,  0.5, -7)
 		            Knob.BackgroundColor3 = Color3.new(1, 1, 1)
 		            Knob.BorderSizePixel  = 0
 		            Knob.ZIndex           = 3
@@ -2395,15 +2403,10 @@ function RayfieldLibrary:CreateWindow(Settings)
 		                local trackCol = val and accentColor or SelectedTheme.ElementBackground
 		                TweenService:Create(Knob,  TweenInfo.new(0.2, Enum.EasingStyle.Quint), {Position        = knobPos}):Play()
 		                TweenService:Create(Track, TweenInfo.new(0.2, Enum.EasingStyle.Quint), {BackgroundColor3 = trackCol}):Play()
-		                if not silent and item.Callback then
-		                    pcall(item.Callback, val)
-		                end
+		                if not silent and item.Callback then pcall(item.Callback, val) end
 		            end
 		
-		            Interact.MouseButton1Click:Connect(function()
-		                setToggle(not toggled)
-		            end)
-		
+		            Interact.MouseButton1Click:Connect(function() setToggle(not toggled) end)
 		            Interact.MouseEnter:Connect(function()
 		                TweenService:Create(Cell, TweenInfo.new(0.2, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}):Play()
 		            end)
@@ -2411,8 +2414,8 @@ function RayfieldLibrary:CreateWindow(Settings)
 		                TweenService:Create(Cell, TweenInfo.new(0.2, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
 		            end)
 		
-		            function itemHandle:Set(val)  setToggle(val, true) end
-		            function itemHandle:Get()     return toggled        end
+		            function itemHandle:Set(val) setToggle(val, true) end
+		            function itemHandle:Get()    return toggled        end
 		
 		        elseif itemType == "Button" then
 		            local Interact = Instance.new("TextButton")
@@ -2428,7 +2431,6 @@ function RayfieldLibrary:CreateWindow(Settings)
 		                TweenService:Create(Cell, TweenInfo.new(0.3,  Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
 		                if item.Callback then pcall(item.Callback) end
 		            end)
-		
 		            Interact.MouseEnter:Connect(function()
 		                TweenService:Create(Cell, TweenInfo.new(0.2, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}):Play()
 		            end)
