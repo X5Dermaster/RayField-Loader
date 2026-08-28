@@ -2452,6 +2452,141 @@ function RayfieldLibrary:CreateWindow(Settings)
 		    return GridValue
 		end
 
+		function Tab:CreateConsoleBox()
+		    local TabPage = TabPage -- udah ada di closure CreateTab
+		    
+		    -- Hapus UIPadding bawaan TabPage
+		    local existingPad = TabPage:FindFirstChildOfClass("UIPadding")
+		    if existingPad then existingPad:Destroy() end
+		    
+		    local FullPad = Instance.new("UIPadding")
+		    FullPad.PaddingTop    = UDim.new(0, 6)
+		    FullPad.PaddingBottom = UDim.new(0, 6)
+		    FullPad.PaddingLeft   = UDim.new(0, 5)
+		    FullPad.PaddingRight  = UDim.new(0, 5)
+		    FullPad.Parent        = TabPage
+		
+		    -- Container
+		    local ConsoleFrame = Instance.new("Frame")
+		    ConsoleFrame.Name               = "ConsoleBox"
+		    ConsoleFrame.Size               = UDim2.new(1, 0, 1, 0)
+		    ConsoleFrame.BackgroundColor3   = SelectedTheme.SecondaryElementBackground
+		    ConsoleFrame.BorderSizePixel    = 0
+		    ConsoleFrame.ClipsDescendants   = true
+		    ConsoleFrame.BackgroundTransparency = 1
+		
+		    local ConsoleCorner = Instance.new("UICorner")
+		    ConsoleCorner.CornerRadius = UDim.new(0, 6)
+		    ConsoleCorner.Parent       = ConsoleFrame
+		
+		    local ConsoleStroke = Instance.new("UIStroke")
+		    ConsoleStroke.Name        = "UIStroke"
+		    ConsoleStroke.Color       = SelectedTheme.SecondaryElementStroke
+		    ConsoleStroke.Transparency = 1
+		    ConsoleStroke.Parent      = ConsoleFrame
+		
+		    -- Dummy buat setElementsVisible
+		    local DummyTitle = Instance.new("TextLabel")
+		    DummyTitle.Name               = "Title"
+		    DummyTitle.Text               = ""
+		    DummyTitle.Size               = UDim2.new(0, 0, 0, 0)
+		    DummyTitle.BackgroundTransparency = 1
+		    DummyTitle.TextTransparency   = 1
+		    DummyTitle.Visible            = false
+		    DummyTitle.Parent             = ConsoleFrame
+		
+		    ConsoleFrame:SetAttribute("BackgroundTransparencyTarget", 0)
+		    ConsoleFrame:SetAttribute("UIStrokeTransparencyTarget",   0)
+		    ConsoleFrame:SetAttribute("TitleTextTransparencyTarget",  1)
+		
+		    ConsoleFrame.Parent = TabPage
+		
+		    -- ScrollingFrame
+		    local Scroller = Instance.new("ScrollingFrame")
+		    Scroller.Name                     = "Scroller"
+		    Scroller.Size                     = UDim2.new(1, -8, 1, -8)
+		    Scroller.Position                 = UDim2.new(0, 4, 0, 4)
+		    Scroller.BackgroundTransparency   = 1
+		    Scroller.BorderSizePixel          = 0
+		    Scroller.ScrollBarThickness       = 4
+		    Scroller.ScrollBarImageColor3     = SelectedTheme.TextColor
+		    Scroller.ScrollBarImageTransparency = 0.5
+		    Scroller.CanvasSize               = UDim2.new(0, 0, 0, 0)
+		    Scroller.AutomaticCanvasSize      = Enum.AutomaticCanvasSize.Y
+		    Scroller.Parent                   = ConsoleFrame
+		
+		    local ListLayout = Instance.new("UIListLayout")
+		    ListLayout.SortOrder  = Enum.SortOrder.LayoutOrder
+		    ListLayout.Padding    = UDim.new(0, 2)
+		    ListLayout.Parent     = Scroller
+		
+		    local ScrollPad = Instance.new("UIPadding")
+		    ScrollPad.PaddingTop   = UDim.new(0, 4)
+		    ScrollPad.PaddingLeft  = UDim.new(0, 6)
+		    ScrollPad.PaddingRight = UDim.new(0, 6)
+		    ScrollPad.Parent       = Scroller
+		
+		    -- Fade in
+		    TweenService:Create(ConsoleFrame, TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {BackgroundTransparency = 0}):Play()
+		    TweenService:Create(ConsoleStroke, TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {Transparency = 0}):Play()
+		
+		    -- Theme listener
+		    Rayfield.Main:GetPropertyChangedSignal('BackgroundColor3'):Connect(function()
+		        ConsoleFrame.BackgroundColor3     = SelectedTheme.SecondaryElementBackground
+		        ConsoleStroke.Color               = SelectedTheme.SecondaryElementStroke
+		        Scroller.ScrollBarImageColor3     = SelectedTheme.TextColor
+		    end)
+		
+		    local lineCount = 0
+		    local levelColors = {
+		        info    = Color3.fromRGB(200, 200, 200),
+		        warn    = Color3.fromRGB(255, 200, 50),
+		        error   = Color3.fromRGB(255, 80,  80),
+		        success = Color3.fromRGB(80,  220, 120),
+		        system  = Color3.fromRGB(100, 160, 255),
+		    }
+		
+		    local function addLine(text, level)
+		        lineCount += 1
+		        local color = levelColors[level or "info"] or levelColors.info
+		
+		        local Line = Instance.new("TextLabel")
+		        Line.Name               = "Line_" .. lineCount
+		        Line.Size               = UDim2.new(1, 0, 0, 0)
+		        Line.AutomaticSize      = Enum.AutomaticSize.Y
+		        Line.BackgroundTransparency = 1
+		        Line.Text               = text
+		        Line.Font               = Enum.Font.Code
+		        Line.TextSize           = 12
+		        Line.TextColor3         = color
+		        Line.TextXAlignment     = Enum.TextXAlignment.Left
+		        Line.TextWrapped        = true
+		        Line.RichText           = false
+		        Line.LayoutOrder        = lineCount
+		        Line.Parent             = Scroller
+		
+		        task.defer(function()
+		            Scroller.CanvasPosition = Vector2.new(0, math.huge)
+		        end)
+		    end
+		
+		    local ConsoleBox = {}
+		
+		    function ConsoleBox:Log(text)     addLine("[INFO]  " .. tostring(text), "info")    end
+		    function ConsoleBox:Warn(text)    addLine("[WARN]  " .. tostring(text), "warn")    end
+		    function ConsoleBox:Error(text)   addLine("[ERROR] " .. tostring(text), "error")   end
+		    function ConsoleBox:Success(text) addLine("[OK]    " .. tostring(text), "success") end
+		    function ConsoleBox:System(text)  addLine("[SYS]   " .. tostring(text), "system")  end
+		    function ConsoleBox:Clear()
+		        for _, child in ipairs(Scroller:GetChildren()) do
+		            if child:IsA("TextLabel") then child:Destroy() end
+		        end
+		        lineCount = 0
+		    end
+		
+		    return ConsoleBox
+		end
+
 		function Tab:CreateImageBar(ImageSettings)
 		    local ImageBarValue = {}
 		
