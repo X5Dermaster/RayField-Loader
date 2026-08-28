@@ -2453,12 +2453,9 @@ function RayfieldLibrary:CreateWindow(Settings)
 		end
 
 		function Tab:CreateConsoleBox()
-		    local TabPage = TabPage -- udah ada di closure CreateTab
-		    
-		    -- Hapus UIPadding bawaan TabPage
 		    local existingPad = TabPage:FindFirstChildOfClass("UIPadding")
 		    if existingPad then existingPad:Destroy() end
-		    
+		
 		    local FullPad = Instance.new("UIPadding")
 		    FullPad.PaddingTop    = UDim.new(0, 6)
 		    FullPad.PaddingBottom = UDim.new(0, 6)
@@ -2466,7 +2463,6 @@ function RayfieldLibrary:CreateWindow(Settings)
 		    FullPad.PaddingRight  = UDim.new(0, 5)
 		    FullPad.Parent        = TabPage
 		
-		    -- Container
 		    local ConsoleFrame = Instance.new("Frame")
 		    ConsoleFrame.Name               = "ConsoleBox"
 		    ConsoleFrame.Size               = UDim2.new(1, 0, 1, 0)
@@ -2480,12 +2476,11 @@ function RayfieldLibrary:CreateWindow(Settings)
 		    ConsoleCorner.Parent       = ConsoleFrame
 		
 		    local ConsoleStroke = Instance.new("UIStroke")
-		    ConsoleStroke.Name        = "UIStroke"
-		    ConsoleStroke.Color       = SelectedTheme.SecondaryElementStroke
+		    ConsoleStroke.Name         = "UIStroke"
+		    ConsoleStroke.Color        = SelectedTheme.SecondaryElementStroke
 		    ConsoleStroke.Transparency = 1
-		    ConsoleStroke.Parent      = ConsoleFrame
+		    ConsoleStroke.Parent       = ConsoleFrame
 		
-		    -- Dummy buat setElementsVisible
 		    local DummyTitle = Instance.new("TextLabel")
 		    DummyTitle.Name               = "Title"
 		    DummyTitle.Text               = ""
@@ -2501,27 +2496,22 @@ function RayfieldLibrary:CreateWindow(Settings)
 		
 		    ConsoleFrame.Parent = TabPage
 		
-		    -- ScrollingFrame
 		    local Scroller = Instance.new("ScrollingFrame")
-		    Scroller.Name                     = "Scroller"
-		    Scroller.Size                     = UDim2.new(1, -8, 1, -8)
-		    Scroller.Position                 = UDim2.new(0, 4, 0, 4)
-		    Scroller.BackgroundTransparency   = 1
-		    Scroller.BorderSizePixel          = 0
-		    Scroller.ScrollBarThickness       = 4
-		    Scroller.ScrollBarImageColor3     = SelectedTheme.TextColor
+		    Scroller.Name                       = "Scroller"
+		    Scroller.Size                       = UDim2.new(1, -8, 1, -8)
+		    Scroller.Position                   = UDim2.new(0, 4, 0, 4)
+		    Scroller.BackgroundTransparency     = 1
+		    Scroller.BorderSizePixel            = 0
+		    Scroller.ScrollBarThickness         = 4
+		    Scroller.ScrollBarImageColor3       = SelectedTheme.TextColor
 		    Scroller.ScrollBarImageTransparency = 0.5
-			Scroller.CanvasSize = UDim2.new(0, 0, 0, 0)
-
-		    ListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-		        Scroller.CanvasSize = UDim2.new(0, 0, 0, ListLayout.AbsoluteContentSize.Y + 10)
-		    end)
-		    Scroller.Parent                   = ConsoleFrame
+		    Scroller.CanvasSize                 = UDim2.new(0, 0, 0, 0)
+		    Scroller.Parent                     = ConsoleFrame
 		
 		    local ListLayout = Instance.new("UIListLayout")
-		    ListLayout.SortOrder  = Enum.SortOrder.LayoutOrder
-		    ListLayout.Padding    = UDim.new(0, 2)
-		    ListLayout.Parent     = Scroller
+		    ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+		    ListLayout.Padding   = UDim.new(0, 2)
+		    ListLayout.Parent    = Scroller
 		
 		    local ScrollPad = Instance.new("UIPadding")
 		    ScrollPad.PaddingTop   = UDim.new(0, 4)
@@ -2529,11 +2519,15 @@ function RayfieldLibrary:CreateWindow(Settings)
 		    ScrollPad.PaddingRight = UDim.new(0, 6)
 		    ScrollPad.Parent       = Scroller
 		
-		    -- Fade in
+		    task.defer(function()
+		        ListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+		            Scroller.CanvasSize = UDim2.new(0, 0, 0, ListLayout.AbsoluteContentSize.Y + 10)
+		        end)
+		    end)
+		
 		    TweenService:Create(ConsoleFrame, TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {BackgroundTransparency = 0}):Play()
 		    TweenService:Create(ConsoleStroke, TweenInfo.new(0.7, Enum.EasingStyle.Exponential), {Transparency = 0}):Play()
 		
-		    -- Theme listener
 		    Rayfield.Main:GetPropertyChangedSignal('BackgroundColor3'):Connect(function()
 		        ConsoleFrame.BackgroundColor3     = SelectedTheme.SecondaryElementBackground
 		        ConsoleStroke.Color               = SelectedTheme.SecondaryElementStroke
@@ -2555,8 +2549,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 		
 		        local Line = Instance.new("TextLabel")
 		        Line.Name               = "Line_" .. lineCount
-		        Line.Size               = UDim2.new(1, 0, 0, 0)
-		        Line.AutomaticSize      = Enum.AutomaticSize.Y
+		        Line.Size               = UDim2.new(1, 0, 0, 16)
 		        Line.BackgroundTransparency = 1
 		        Line.Text               = text
 		        Line.Font               = Enum.Font.Code
@@ -2585,6 +2578,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 		            if child:IsA("TextLabel") then child:Destroy() end
 		        end
 		        lineCount = 0
+		        Scroller.CanvasSize = UDim2.new(0, 0, 0, 0)
 		    end
 		
 		    return ConsoleBox
