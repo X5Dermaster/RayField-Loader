@@ -2511,7 +2511,11 @@ function RayfieldLibrary:CreateWindow(Settings)
 		    Scroller.ScrollBarThickness       = 4
 		    Scroller.ScrollBarImageColor3     = SelectedTheme.TextColor
 		    Scroller.ScrollBarImageTransparency = 0.5
-		    Scroller.CanvasSize               = UDim2.new(0, 0, 0, 0)
+			Scroller.CanvasSize = UDim2.new(0, 0, 0, 0)
+
+		    ListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+		        Scroller.CanvasSize = UDim2.new(0, 0, 0, ListLayout.AbsoluteContentSize.Y + 10)
+		    end)
 		    Scroller.AutomaticCanvasSize      = Enum.AutomaticCanvasSize.Y
 		    Scroller.Parent                   = ConsoleFrame
 		
